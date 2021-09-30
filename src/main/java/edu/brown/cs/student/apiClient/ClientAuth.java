@@ -1,4 +1,4 @@
-package edu.brown.cs.student.ApiClient;
+package edu.brown.cs.student.apiClient;
 
 import edu.brown.cs.student.main.FileParser;
 
@@ -13,7 +13,7 @@ public class ClientAuth {
    *
    * @return a String of the api key.
    */
-  public static String getApiKey() {
+  public static String getApiAuth() {
     FileParser parser = new FileParser("config/secret/loginAndKey.txt");
     return parser.readNewLine();
   }
