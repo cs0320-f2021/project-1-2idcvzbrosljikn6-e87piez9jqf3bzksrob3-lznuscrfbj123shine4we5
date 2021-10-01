@@ -1,23 +1,28 @@
 package edu.brown.cs.student.runway;
 
-import java.time.LocalDate;
+import com.google.gson.annotations.SerializedName;
 
 public class Review {
-  private String review_text;
-  private String review_summary;
-  private String review_date;
+  @SerializedName("review_text")
+  private String reviewText;
+
+  @SerializedName("review_summary")
+  private String reviewSummary;
+
+  @SerializedName("review_date")
+  private String reviewDate;
   private int id;
 
   public String getReviewText() {
-    return review_text;
+    return reviewText;
   }
 
   public String getReviewSummary() {
-    return review_summary;
+    return reviewSummary;
   }
 
   public String getReviewDate() {
-    return review_date;
+    return reviewDate;
   }
 
   public int getId() {
