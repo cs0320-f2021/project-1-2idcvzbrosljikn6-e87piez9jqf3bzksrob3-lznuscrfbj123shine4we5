@@ -1,29 +1,37 @@
 package edu.brown.cs.student.runway;
 
+import com.google.gson.annotations.SerializedName;
+
 public class User {
 
-  private int user_id;
-  private String weight; // String?
-  private String bust_size;
+  @SerializedName("user_id")
+  private int userId;
+  private String weight;
+
+  @SerializedName("bust_size")
+  private String bustSize;
   private String height;
   private int age;
-  private String body_type;
+
+  @SerializedName("body_type")
+  private String bodyType;
   private String horoscope;
 
-  public String getWeight() {
-    return this.weight;
+  public int getWeight() {
+    return Integer.parseInt(weight.substring(0, weight.length() - 3));
   }
 
   public int getUserId() {
-    return user_id;
+    return userId;
   }
 
   public String getBustSize() {
-    return bust_size;
+    return bustSize;
   }
 
-  public String getHeight() {
-    return height;
+  public int getHeight() {
+    String[] nums = height.replace("\"", "").split("'");
+    return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
   }
 
   public int getAge() {
@@ -31,7 +39,7 @@ public class User {
   }
 
   public String getBodyType() {
-    return body_type;
+    return bodyType;
   }
 
   public String getHoroscope() {

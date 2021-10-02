@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -23,6 +26,9 @@ import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
 
+import com.google.gson.Gson;
+import edu.brown.cs.student.apiClient.ApiClient;
+import edu.brown.cs.student.runway.Runway;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -54,9 +60,11 @@ public final class Main {
   }
 
   private String[] args;
+  private ApiClient client;
 
   private Main(String[] args) {
     this.args = args;
+    this.client = new ApiClient();
   }
 
   private void run() {
@@ -123,6 +131,19 @@ public final class Main {
             case "naive_neighbors":
               naiveNeighborsHelper(arguments);
               break;
+            case "get_users":
+              client.usersApiCall();
+              break;
+            case "get_rents":
+              client.rentsApiCall();
+              break;
+            case "get_reviews":
+              client.reviewsApiCall();
+              break;
+            case "open_file":
+              openFileHelper(arguments);
+              break;
+
             case "users":
               // TODO: Load in user data to a KDTree by saying users [file location]
               usersHelper(arguments);
@@ -137,7 +158,8 @@ public final class Main {
               break;
             default:
               System.out.println("ERROR: invalid command.");
-              System.out.println("Valid commands: stars, naive_neighbors");
+              System.out.println("Valid commands: stars, naive_neighbors, get_users, get_rents, " +
+                  "get_reviews");
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
@@ -146,6 +168,66 @@ public final class Main {
     } catch (Exception e) {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
+    }
+  }
+
+  /**
+   * Helper method called when the user runs the open_file command
+   * @param arguments the array of command line arguments
+   */
+  private void openFileHelper(String[] arguments) {
+    if (arguments.length != 2) {
+      System.out.println("ERROR: Invalid number of arguments for open_file");
+      System.out.println("Usage: open_file <filepath>");
+      return;
+    }
+
+    try {
+      String json = Files.readString(Path.of(arguments[1]));
+      System.out.println(json);
+      Runway[] data = new Gson().fromJson(json, Runway[].class);
+      DataStore.setRunways(data);
+    } catch (IOException e) {
+      System.out.println("ERROR: Unable to read from file " + arguments[1]);
+    } catch (InvalidPathException e) {
+      System.out.println("ERROR: Invalid path " + arguments[1]);
+    }
+  }
+
+  /**
+   * Helper method called when the user runs the users command.
+   * Loads the users data from an inputted file into a KDTree.
+   * @param arguments
+   */
+  private void usersHelper(String[] arguments) {
+    //TODO: Checking that arguments are valid
+
+    //TODO: Below code should only run for JSON files
+    String filepath = arguments[1];
+    FileParser parse = new FileParser(filepath);
+    List<Hashtable<String,String>> user_list = new ArrayList<>();
+    while(true){
+      String s = parse.readNewLine();
+      if(s == null){
+        break;
+      }
+      Hashtable<String,String> user_data = new Hashtable<String,String>();
+
+      //remove bracket chars
+      s = s.replaceAll("[\\[\\](){}]","");
+      //split line into key/value pairs
+      String[] pairs = s.split(",");
+      //build user_data map
+      for (String pair : pairs){
+        //split pair into key and value
+        pair = pair.replace("\"","");
+        String[] kv = pair.split(":");
+
+        //add pair to data map
+        user_data.put(kv[0],kv[1]);
+      }
+      //add user_data to user_list
+      user_list.add(user_data);
     }
 
   }
@@ -339,7 +421,7 @@ public final class Main {
 
   /**
    * Helper method that determines which stars to print, including randomisation of equidistant
-   * stars, and prints the star IDs
+   * stars, and prints the star IDs.
    * @param k the number of star IDs to be printed
    */
   private void kStars(int k) {

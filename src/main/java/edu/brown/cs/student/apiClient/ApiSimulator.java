@@ -23,45 +23,16 @@ public class ApiSimulator {
     return "[{\"fit\": \"fit\", \"user_id\": \"420272\", \"item_id\": \"2260466\", \"rating\": \"10\", \"rented_for\": \"vacation\", \"category\": \"romper\", \"size\": \"14\", \"id\": 1}, {\"fit\": \"fit\", \"user_id\": \"273551\", \"item_id\": \"153475\", \"rating\": \"10\", \"rented_for\": \"other\", \"category\": \"gown\", \"size\": \"12\", \"id\": 2}, {\"fit\": \"fit\", \"user_id\": \"909926\", \"item_id\": \"126335\", \"rating\": \"8\", \"rented_for\": \"formal affair\", \"category\": \"dress\", \"size\": \"8\", \"id\": 3}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"616682\", \"rating\": \"10\", \"rented_for\": \"wedding\", \"category\": \"gown\", \"size\": \"12\", \"id\": 4}, {\"fit\": \"fit\", \"user_id\": \"734848\", \"item_id\": \"364092\", \"rating\": \"8\", \"rented_for\": \"date\", \"category\": \"dress\", \"size\": \"8\", \"id\": 5}, {\"fit\": \"fit\", \"user_id\": \"336066\", \"item_id\": \"568429\", \"rating\": \"10\", \"rented_for\": \"everyday\", \"category\": \"dress\", \"size\": \"4\", \"id\": 6}, {\"fit\": \"fit\", \"user_id\": \"86661\", \"item_id\": \"130259\", \"rating\": \"10\", \"rented_for\": \"formal affair\", \"category\": \"dress\", \"size\": \"8\", \"id\": 7}, {\"fit\": \"fit\", \"user_id\": \"154309\", \"item_id\": \"1729232\", \"rating\": \"10\", \"rented_for\": \"formal affair\", \"category\": \"gown\", \"size\": \"1\", \"id\": 8}, {\"fit\": \"small\", \"user_id\": \"185966\", \"item_id\": \"1077123\", \"rating\": \"8\", \"rented_for\": \"party\", \"category\": \"dress\", \"size\": \"12\", \"id\": 9}, {\"fit\": \"large\", \"user_id\": \"533900\", \"item_id\": \"130259\", \"rating\": \"8\", \"rented_for\": \"wedding\", \"category\": \"dress\", \"size\": \"8\", \"id\": 10}, {\"fit\": \"fit\", \"user_id\": \"87660\", \"item_id\": \"1295171\", \"rating\": \"10\", \"rented_for\": \"party\", \"category\": \"sheath\", \"size\": \"8\", \"id\": 11}, {\"fit\": \"large\", \"user_id\": \"391778\", \"item_id\": \"143094\", \"rating\": \"8\", \"rented_for\": \"party\", \"category\": \"dress\", \"size\": \"20\", \"id\": 12}, {\"fit\": \"fit\", \"user_id\": \"721308\", \"item_id\": \"123793\", \"rating\": \"10\", \"rented_for\": \"formal affair\", \"category\": \"gown\", \"size\": \"2\", \"id\": 13}, {\"fit\": \"fit\", \"user_id\": \"829124\", \"item_id\": \"2595752\", \"rating\": \"10\", \"rented_for\": \"party\", \"category\": \"leggings\", \"size\": \"20\", \"id\": 14}, {\"fit\": \"fit\", \"user_id\": \"499943\", \"item_id\": \"909221\", \"rating\": \"10\", \"rented_for\": \"vacation\", \"category\": \"dress\", \"size\": \"20\", \"id\": 15}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"466944\", \"rating\": \"10\", \"rented_for\": \"wedding\", \"category\": \"gown\", \"size\": \"16\", \"id\": 1718}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"2376757\", \"rating\": \"10\", \"rented_for\": \"work\", \"category\": \"sweater\", \"size\": \"20\", \"id\": 8632}, {\"fit\": \"fit\", \"user_id\": \"420272\", \"item_id\": \"1083818\", \"rating\": \"10\", \"rented_for\": \"vacation\", \"category\": \"dress\", \"size\": \"14\", \"id\": 12518}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"1427750\", \"rating\": \"10\", \"rented_for\": \"wedding\", \"category\": \"dress\", \"size\": \"16\", \"id\": 22568}, {\"fit\": \"fit\", \"user_id\": \"420272\", \"item_id\": \"2340996\", \"rating\": \"2\", \"rented_for\": \"everyday\", \"category\": \"jumpsuit\", \"size\": \"14\", \"id\": 32354}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"1187427\", \"rating\": \"10\", \"rented_for\": \"everyday\", \"category\": \"dress\", \"size\": \"16\", \"id\": 38407}, {\"fit\": \"large\", \"user_id\": \"829124\", \"item_id\": \"2008978\", \"rating\": \"8\", \"rented_for\": \"other\", \"category\": \"romper\", \"size\": \"8\", \"id\": 41405}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"1746190\", \"rating\": \"10\", \"rented_for\": \"party\", \"category\": \"dress\", \"size\": \"16\", \"id\": 42720}, {\"fit\": \"fit\", \"user_id\": \"420272\", \"item_id\": \"2363191\", \"rating\": \"10\", \"rented_for\": \"party\", \"category\": \"jumpsuit\", \"size\": \"12\", \"id\": 46519}, {\"fit\": \"fit\", \"user_id\": \"420272\", \"item_id\": \"348662\", \"rating\": \"8\", \"rented_for\": \"other\", \"category\": \"dress\", \"size\": \"8\", \"id\": 53441}, {\"fit\": \"fit\", \"user_id\": \"721308\", \"item_id\": \"172027\", \"rating\": \"10\", \"rented_for\": \"party\", \"category\": \"dress\", \"size\": \"8\", \"id\": 59187}, {\"fit\": \"fit\", \"user_id\": \"721308\", \"item_id\": \"187164\", \"rating\": \"8\", \"rented_for\": \"party\", \"category\": \"dress\", \"size\": \"4\", \"id\": 66628}, {\"fit\": \"fit\", \"user_id\": \"829124\", \"item_id\": \"128730\", \"rating\": \"8\", \"rented_for\": \"wedding\", \"category\": \"dress\", \"size\": \"12\", \"id\": 72471}, {\"fit\": \"fit\", \"user_id\": \"151944\", \"item_id\": \"524341\", \"rating\": \"10\", \"rented_for\": \"wedding\", \"category\": \"gown\", \"size\": \"16\", \"id\": 82212}, {\"fit\": \"small\", \"user_id\": \"420272\", \"item_id\": \"2431951\", \"rating\": \"6\", \"rented_for\": \"vacation\", \"category\": \"jumpsuit\", \"size\": \"14\", \"id\": 102758}]";
   }
 
+  public static String getRunway() {
+    return "{\"fit\": \"fit\", \"user_id\": \"420272\", \"bust_size\": \"34d\", \"item_id\": \"2260466\", \"weight\": \"137lbs\", \"rating\": \"10\", \"rented_for\": \"vacation\", \"review_text\": \"An adorable romper! Belt and zipper were a little hard to navigate in a full day of wear/bathroom use, but that's to be expected. Wish it had pockets, but other than that-- absolutely perfect! I got a million compliments.\", \"body_type\": \"hourglass\", \"review_summary\": \"So many compliments!\", \"category\": \"romper\", \"height\": \"5' 8\\\"\", \"size\": \"14\", \"age\": \"28\", \"review_date\": \"April 20, 2016\", \"id\": 1, \"horoscope\": \"Taurus\"},\n" +
+        "{\"fit\": \"fit\", \"user_id\": \"273551\", \"bust_size\": \"34b\", \"item_id\": \"153475\", \"weight\": \"132lbs\", \"rating\": \"10\", \"rented_for\": \"other\", \"review_text\": \"I rented this dress for a photo shoot. The theme was \\\"Hollywood Glam and Big Beautiful Hats\\\". The dress was very comfortable and easy to move around in. It is definitely on my list to rent again for another formal event. \", \"body_type\": \"straight & narrow\", \"review_summary\": \"I felt so glamourous!!!\", \"category\": \"gown\", \"height\": \"5' 6\\\"\", \"size\": \"12\", \"age\": \"36\", \"review_date\": \"June 18, 2013\", \"id\": 2, \"horoscope\": \"Virgo\"}";
+  }
+
   public static void main(String[] args) {
     ApiClient ac = new ApiClient();
     Gson gson = new Gson();
-    String users = ac.usersApiCall();
-    User[] userArray = gson.fromJson(users, User[].class);
-    System.out.println(Arrays.toString(userArray));
-//
-//    String reviews = ac.reviewsApiCall();
-//    Review[] reviewsArray = gson.fromJson(reviews, Review[].class);
-//    System.out.println(Arrays.toString(reviewsArray));
-    User r = userArray[0];
-
-//    String rents = ac.rentsApiCall();
-//    System.out.println(rents);
-//    Rent[] rentArray = gson.fromJson(rents, Rent[].class);
-//    System.out.println(Arrays.toString(rentArray));
-//    Rent r = rentArray[0];
-//    System.out.println(r.getFit());
-//    System.out.println(r.getUser_id());
-//    System.out.println(r.getItem_id());
-//    System.out.println(r.getRating());
-//    System.out.println(r.getRentedFor());
-//    System.out.println(r.getCategory());
-//    System.out.println(r.getSize());
-//    System.out.println(r.getReviewText());
-//    System.out.println(r.getReviewSummary());
-//    System.out.println(r.getReviewDate());
-//
-//
-//    System.out.println(r.getId());
-
-    System.out.println(r.getUserId());
-    System.out.println(r.getWeight());
-    System.out.println(r.getBustSize());
-    System.out.println(r.getHeight());
-    System.out.println(r.getAge());
-    System.out.println(r.getBodyType());
-    System.out.println(r.getHoroscope());
+//    User[] users = ac.usersApiCall();
+//    User[] userArray = gson.fromJson(users, User[].class);
+//    System.out.println(Arrays.toString(userArray));
   }
-
-
 }
