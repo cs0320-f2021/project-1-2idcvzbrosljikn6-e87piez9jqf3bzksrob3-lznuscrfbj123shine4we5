@@ -199,25 +199,22 @@ public final class Main {
    * Loads the users data from an inputted file into a KDTree.
    * @param arguments
    */
-  private void usersHelper(String[] arguments) {
+ private void usersHelper(String[] arguments) {
     //TODO: Checking that arguments are valid
 
-    //TODO: Below code should only run for JSON files
+    //TODO: Reformat according to the setup in API component
     String filepath = arguments[1];
     FileParser parse = new FileParser(filepath);
     List<Hashtable<String,String>> user_list = new ArrayList<>();
-    while(true){
-      String s = parse.readNewLine();
-      if(s == null){
-        break;
-      }
+    String s = parse.readNewLine();
+    while(s != null){
       Hashtable<String,String> user_data = new Hashtable<String,String>();
 
       //remove bracket chars
       s = s.replaceAll("[\\[\\](){}]","");
       //split line into key/value pairs
       String[] pairs = s.split(",");
-      //build user_data map
+      //build user_data table
       for (String pair : pairs){
         //split pair into key and value
         pair = pair.replace("\"","");
@@ -228,44 +225,8 @@ public final class Main {
       }
       //add user_data to user_list
       user_list.add(user_data);
-    }
 
-  }
-
-  /**
-   * Helper method called when the user runs the users command.
-   * Loads the users data from an inputted file into a KDTree.
-   * @param arguments
-   */
-  private void usersHelper(String[] arguments) {
-    //TODO: Checking that arguments are valid
-
-    //TODO: Below code should only run for JSON files
-    String filepath = arguments[1];
-    FileParser parse = new FileParser(filepath);
-    List<Hashtable<String,String>> user_list = new ArrayList<>();
-    while(true){
-      String s = parse.readNewLine();
-      if(s == null){
-        break;
-      }
-      Hashtable<String,String> user_data = new Hashtable<String,String>();
-
-      //remove bracket chars
-      s = s.replaceAll("[\\[\\](){}]","");
-      //split line into key/value pairs
-      String[] pairs = s.split(",");
-      //build user_data map
-      for (String pair : pairs){
-        //split pair into key and value
-        pair = pair.replace("\"","");
-        String[] kv = pair.split(":");
-
-        //add pair to data map
-        user_data.put(kv[0],kv[1]);
-      }
-      //add user_data to user_list
-      user_list.add(user_data);
+      s = parse.readNewLine();
     }
 
   }
