@@ -10,6 +10,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -40,6 +42,7 @@ public final class Main {
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
   private ArrayList<ArrayList<String>> stars;
+  private KDTree kdtree;
 
   /**
    * The initial method called when execution begins.
@@ -120,6 +123,18 @@ public final class Main {
             case "naive_neighbors":
               naiveNeighborsHelper(arguments);
               break;
+            case "users":
+              // TODO: Load in user data to a KDTree by saying users [file location]
+              usersHelper(arguments);
+              break;
+            case "similar":
+              // TODO: Print out the user_ids of the most similar k users to an ID by saying:
+              // similar k [ID]
+              // similar k [weight] [height] [age]
+              break;
+            case "classify":
+              //TODO: print out horoscope comparison chart of the k most similar users
+              break;
             default:
               System.out.println("ERROR: invalid command.");
               System.out.println("Valid commands: stars, naive_neighbors");
@@ -131,6 +146,44 @@ public final class Main {
     } catch (Exception e) {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
+    }
+
+  }
+
+  /**
+   * Helper method called when the user runs the users command.
+   * Loads the users data from an inputted file into a KDTree.
+   * @param arguments
+   */
+  private void usersHelper(String[] arguments) {
+    //TODO: Checking that arguments are valid
+
+    //TODO: Below code should only run for JSON files
+    String filepath = arguments[1];
+    FileParser parse = new FileParser(filepath);
+    List<Hashtable<String,String>> user_list = new ArrayList<>();
+    while(true){
+      String s = parse.readNewLine();
+      if(s == null){
+        break;
+      }
+      Hashtable<String,String> user_data = new Hashtable<String,String>();
+
+      //remove bracket chars
+      s = s.replaceAll("[\\[\\](){}]","");
+      //split line into key/value pairs
+      String[] pairs = s.split(",");
+      //build user_data map
+      for (String pair : pairs){
+        //split pair into key and value
+        pair = pair.replace("\"","");
+        String[] kv = pair.split(":");
+
+        //add pair to data map
+        user_data.put(kv[0],kv[1]);
+      }
+      //add user_data to user_list
+      user_list.add(user_data);
     }
 
   }
