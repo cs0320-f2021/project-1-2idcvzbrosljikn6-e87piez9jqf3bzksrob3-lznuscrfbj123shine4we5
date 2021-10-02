@@ -18,7 +18,7 @@ public class User {
   private String horoscope;
 
   public String getWeight() {
-    return this.weight;
+    return weight;
   }
 
   public int getUserId() {
