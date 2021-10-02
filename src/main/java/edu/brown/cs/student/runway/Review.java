@@ -28,11 +28,4 @@ public class Review {
   public int getId() {
     return id;
   }
-
-//  public Review(String reviewText, String reviewSummary, LocalDate reviewDate, int id) {
-//    this.reviewText = reviewText;
-//    this.reviewSummary = reviewSummary;
-//    this.reviewDate = reviewDate;
-//    this.id = id;
-//  }
 }

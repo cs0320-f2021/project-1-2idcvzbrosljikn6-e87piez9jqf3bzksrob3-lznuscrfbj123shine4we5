@@ -286,7 +286,7 @@ public final class Main {
 
   /**
    * Helper method that determines which stars to print, including randomisation of equidistant
-   * stars, and prints the star IDs
+   * stars, and prints the star IDs.
    * @param k the number of star IDs to be printed
    */
   private void kStars(int k) {

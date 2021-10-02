@@ -1,44 +1,35 @@
 package edu.brown.cs.student.runway;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Rent {
   private String fit;
-  private int user_id; //long? string? or instance of User?
-  // private final User linkedUser;
-  private int item_id; // long? string?
+  @SerializedName("user_id")
+  private int userId;
+  @SerializedName("item_id")
+  private int itemId;
   private int rating;
-  private String rented_for;
+
+  @SerializedName("rented_for")
+  private String rentedFor;
   private String category;
   private int size;
-  private int id; // or just instance of Review?
-  // private final Review linkedReview;
+  private int id;
 
-//  public Rent(String fit, int userId, int itemId, int rating, String rentedFor,
-//              String category, int size, int id) {
-//    this.fit = fit;
-//    this.userId = userId;
-//    this.itemId = itemId;
-//    this.rating = rating;
-//    this.rentedFor = rentedFor;
-//    this.category = category;
-//    this.size = size;
-//    this.id = id;
-//    System.out.println(id);
-//  }
-
-  public String getRentedFor(){
-    return this.rented_for;
+  public String getRentedFor() {
+    return rentedFor;
   }
 
   public String getFit() {
     return fit;
   }
 
-  public int getUser_id() {
-    return user_id;
+  public int getUserId() {
+    return userId;
   }
 
-  public int getItem_id() {
-    return item_id;
+  public int getItemId() {
+    return itemId;
   }
 
   public int getRating() {

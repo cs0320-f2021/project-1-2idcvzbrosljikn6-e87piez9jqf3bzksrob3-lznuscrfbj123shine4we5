@@ -26,14 +26,14 @@ public class ApiSimulator {
   public static void main(String[] args) {
     ApiClient ac = new ApiClient();
     Gson gson = new Gson();
-    String users = ac.usersApiCall();
-    User[] userArray = gson.fromJson(users, User[].class);
-    System.out.println(Arrays.toString(userArray));
+    User[] users = ac.usersApiCall();
+//    User[] userArray = gson.fromJson(users, User[].class);
+//    System.out.println(Arrays.toString(userArray));
 //
 //    String reviews = ac.reviewsApiCall();
 //    Review[] reviewsArray = gson.fromJson(reviews, Review[].class);
 //    System.out.println(Arrays.toString(reviewsArray));
-    User r = userArray[0];
+    User r = users[0];
 
 //    String rents = ac.rentsApiCall();
 //    System.out.println(rents);

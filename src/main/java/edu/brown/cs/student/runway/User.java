@@ -6,7 +6,7 @@ public class User {
 
   @SerializedName("user_id")
   private int userId;
-  private String weight; // String?
+  private String weight;
 
   @SerializedName("bust_size")
   private String bustSize;
