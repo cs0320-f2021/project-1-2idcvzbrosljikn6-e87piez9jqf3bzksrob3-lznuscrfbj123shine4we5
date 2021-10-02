@@ -57,8 +57,8 @@ public class Runway {
     return itemId;
   }
 
-  public String getWeight() {
-    return weight;
+  public int getWeight() {
+    return Integer.parseInt(weight.substring(0, weight.length() - 3));
   }
 
   public int getRating() {
@@ -85,8 +85,9 @@ public class Runway {
     return category;
   }
 
-  public String getHeight() {
-    return height;
+  public int getHeight() {
+    String[] nums = height.replace("\"", "").split("'");
+    return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
   }
 
   public int getAge() {

@@ -31,42 +31,8 @@ public class ApiSimulator {
   public static void main(String[] args) {
     ApiClient ac = new ApiClient();
     Gson gson = new Gson();
-    User[] users = ac.usersApiCall();
+//    User[] users = ac.usersApiCall();
 //    User[] userArray = gson.fromJson(users, User[].class);
 //    System.out.println(Arrays.toString(userArray));
-//
-//    String reviews = ac.reviewsApiCall();
-//    Review[] reviewsArray = gson.fromJson(reviews, Review[].class);
-//    System.out.println(Arrays.toString(reviewsArray));
-    User r = users[0];
-
-//    String rents = ac.rentsApiCall();
-//    System.out.println(rents);
-//    Rent[] rentArray = gson.fromJson(rents, Rent[].class);
-//    System.out.println(Arrays.toString(rentArray));
-//    Rent r = rentArray[0];
-//    System.out.println(r.getFit());
-//    System.out.println(r.getUser_id());
-//    System.out.println(r.getItem_id());
-//    System.out.println(r.getRating());
-//    System.out.println(r.getRentedFor());
-//    System.out.println(r.getCategory());
-//    System.out.println(r.getSize());
-//    System.out.println(r.getReviewText());
-//    System.out.println(r.getReviewSummary());
-//    System.out.println(r.getReviewDate());
-//
-//
-//    System.out.println(r.getId());
-
-    System.out.println(r.getUserId());
-    System.out.println(r.getWeight());
-    System.out.println(r.getBustSize());
-    System.out.println(r.getHeight());
-    System.out.println(r.getAge());
-    System.out.println(r.getBodyType());
-    System.out.println(r.getHoroscope());
   }
-
-
 }

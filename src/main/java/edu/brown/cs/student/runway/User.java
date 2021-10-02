@@ -17,8 +17,8 @@ public class User {
   private String bodyType;
   private String horoscope;
 
-  public String getWeight() {
-    return weight;
+  public int getWeight() {
+    return Integer.parseInt(weight.substring(0, weight.length() - 3));
   }
 
   public int getUserId() {
@@ -29,8 +29,9 @@ public class User {
     return bustSize;
   }
 
-  public String getHeight() {
-    return height;
+  public int getHeight() {
+    String[] nums = height.replace("\"", "").split("'");
+    return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
   }
 
   public int getAge() {

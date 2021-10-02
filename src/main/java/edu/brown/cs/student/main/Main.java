@@ -132,14 +132,13 @@ public final class Main {
               naiveNeighborsHelper(arguments);
               break;
             case "get_users":
-              User[] users = client.usersApiCall();
-              System.out.println(users[0].getUserId());
+              client.usersApiCall();
               break;
             case "get_rents":
-              Rent[] rents = client.rentsApiCall();
+              client.rentsApiCall();
               break;
             case "get_reviews":
-              Review[] reviews = client.reviewsApiCall();
+              client.reviewsApiCall();
               break;
             case "open_file":
               openFileHelper(arguments);
@@ -174,6 +173,7 @@ public final class Main {
       String json = Files.readString(Path.of(arguments[1]));
       System.out.println(json);
       Runway[] data = new Gson().fromJson(json, Runway[].class);
+      DataStore.setRunways(data);
     } catch (IOException e) {
       System.out.println("ERROR: Unable to read from file " + arguments[1]);
     } catch (InvalidPathException e) {

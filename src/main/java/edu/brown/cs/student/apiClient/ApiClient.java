@@ -1,6 +1,8 @@
 package edu.brown.cs.student.apiClient;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import edu.brown.cs.student.main.DataStore;
 import edu.brown.cs.student.runway.Rent;
 import edu.brown.cs.student.runway.Review;
 import edu.brown.cs.student.runway.User;
@@ -22,28 +24,40 @@ public class ApiClient {
     this.apiAuth = ClientAuth.getApiAuth();
     this.client = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
-        .connectTimeout(Duration.ofMillis(100))
+        .connectTimeout(Duration.ofMillis(1000))
         .build();
   }
 
-  public User[] usersApiCall() {
+  public void usersApiCall() {
 
-    String reqUri = "https://runwayapi.herokuapp.com/users-two";
+    String reqUri = "https://runwayapi.herokuapp.com/users-two" + apiAuth;
     String userJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
         .header("x-api-key", apiAuth).GET().build());
 
 //    String userJson = ApiSimulator.getSimulatedUsers();
-    return new Gson().fromJson(userJson, User[].class);
+    try {
+      DataStore.setUsers(new Gson().fromJson(userJson, User[].class));
+    } catch (JsonSyntaxException e) {
+      System.out.println("ERROR: fill in here");
+    }
   }
 
-  public Review[] reviewsApiCall() {
+  public void reviewsApiCall() {
     String reviewJson = ApiSimulator.getSimulatedReviews();
-    return new Gson().fromJson(reviewJson, Review[].class);
+    try {
+      DataStore.setReviews(new Gson().fromJson(reviewJson, Review[].class));
+    } catch (JsonSyntaxException e) {
+      System.out.println("ERROR: fill in here");
+    }
   }
 
-  public Rent[] rentsApiCall() {
+  public void rentsApiCall() {
     String rentsJson = ApiSimulator.getSimulatedRents();
-    return new Gson().fromJson(rentsJson, Rent[].class);
+    try {
+      DataStore.setRents(new Gson().fromJson(rentsJson, Rent[].class));
+    } catch (JsonSyntaxException e) {
+      System.out.println("ERROR: fill in here");
+    }
   }
 
   private String makeRequest(HttpRequest req) {
