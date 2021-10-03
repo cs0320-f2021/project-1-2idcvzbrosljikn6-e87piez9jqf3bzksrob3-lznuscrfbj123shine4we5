@@ -64,39 +64,41 @@ public class ApiClient {
   }
 
   private String makeRequest(HttpRequest req) {
-      HttpResponse<String> apiResponse = null;
-      for (int i = 0; i < 5; i++) {
-        System.out.println(i);
-        try {
-          apiResponse = client.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException ioe) {
-          System.out.println("An I/O error occurred when sending or receiving data.");
-          System.out.println(ioe.getMessage());
+    HttpResponse<String> apiResponse = null;
+    for (int i = 0; i < 5; i++) {
+      System.out.println(i);
+      try {
+        apiResponse = client.send(req, HttpResponse.BodyHandlers.ofString());
+      } catch (IOException ioe) {
+        System.out.println("An I/O error occurred when sending or receiving data.");
+        System.out.println(ioe.getMessage());
 
-        } catch (InterruptedException ie) {
-          System.out.println("The operation was interrupted.");
-          System.out.println(ie.getMessage());
+      } catch (InterruptedException ie) {
+        System.out.println("The operation was interrupted.");
+        System.out.println(ie.getMessage());
 
-        } catch (IllegalArgumentException iae) {
-          System.out.println(
-              "The request argument was invalid. It must be built as specified by HttpRequest.Builder.");
-          System.out.println(iae.getMessage());
+      } catch (IllegalArgumentException iae) {
+        System.out.println(
+            "The request argument was invalid. It must be built as specified"
+                + " by HttpRequest.Builder.");
+        System.out.println(iae.getMessage());
 
-        } catch (SecurityException se) {
-          System.out.println("There was a security configuration error.");
-          System.out.println(se.getMessage());
-        }
-        if (apiResponse != null && apiResponse.statusCode() >= 200 && apiResponse.statusCode() < 300) {
-          break;
-        }
+      } catch (SecurityException se) {
+        System.out.println("There was a security configuration error.");
+        System.out.println(se.getMessage());
       }
-
-      if (apiResponse == null) {
-        return "ERROR";
+      if (apiResponse != null
+          && apiResponse.statusCode() >= 200 && apiResponse.statusCode() < 300) {
+        break;
       }
+    }
 
-      System.out.println("Status " + apiResponse.statusCode());
-      System.out.println(apiResponse.body());
-      return apiResponse.body();
+    if (apiResponse == null) {
+      return "ERROR";
+    }
+
+    System.out.println("Status " + apiResponse.statusCode());
+    System.out.println(apiResponse.body());
+    return apiResponse.body();
   }
 }

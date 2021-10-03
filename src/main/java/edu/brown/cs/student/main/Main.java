@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,7 @@ public final class Main {
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
   private ArrayList<ArrayList<String>> stars;
-  private KDTree kdtree;
+  private KDTree kdTree = null;
 
   /**
    * The initial method called when execution begins.
@@ -140,26 +139,50 @@ public final class Main {
             case "get_reviews":
               client.reviewsApiCall();
               break;
-            case "open_file":
-              openFileHelper(arguments);
-              break;
-
             case "users":
-              // TODO: Load in user data to a KDTree by saying users [file location]
               usersHelper(arguments);
               break;
             case "similar":
-              // TODO: Print out the user_ids of the most similar k users to an ID by saying:
-              // similar k [ID]
-              // similar k [weight] [height] [age]
+              //if no tree has been loaded yet
+              similarHelper(arguments);
               break;
             case "classify":
-              //TODO: print out horoscope comparison chart of the k most similar users
+              if (kdTree == null) {
+                System.out.println("No KD Tree found. "
+                    + "Load a KD Tree using the \"users\" command first.");
+                break;
+              }
+              if (arguments.length == 3) {
+                boolean userExists = false;
+                for (Runway user : DataStore.getRunways()) {
+                  if (user.getUserId() == Integer.parseInt(arguments[2])) {
+                    Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                        user.getWeight(), user.getHeight(), user.getAge());
+                    classifyHelper(classify);
+                    userExists = true;
+                    break;
+                  }
+                }
+                if (!userExists) {
+                  System.out.println("No user with that ID could be found. "
+                      + "Please enter valid ID.");
+                }
+              } else if (arguments.length == 5) {
+                Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                    Integer.parseInt(arguments[2]),
+                    Integer.parseInt(arguments[3]),
+                    Integer.parseInt(arguments[4]));
+                classifyHelper(classify);
+                break;
+              } else {
+                System.out.println("Invalid arguments.");
+                break;
+              }
               break;
             default:
               System.out.println("ERROR: invalid command.");
-              System.out.println("Valid commands: stars, naive_neighbors, get_users, get_rents, " +
-                  "get_reviews");
+              System.out.println("Valid commands: stars, naive_neighbors, get_users, get_rents, "
+                  + "get_reviews, users");
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
@@ -171,71 +194,118 @@ public final class Main {
     }
   }
 
-  /**
-   * Helper method called when the user runs the open_file command
-   * @param arguments the array of command line arguments
-   */
-  private void openFileHelper(String[] arguments) {
-    if (arguments.length != 2) {
-      System.out.println("ERROR: Invalid number of arguments for open_file");
-      System.out.println("Usage: open_file <filepath>");
+  private void similarHelper(String[] arguments) {
+    if (kdTree == null) {
+      System.out.println("No KD Tree found. "
+          + "Load a KD Tree using the \"users\" command first.");
       return;
     }
+    //if userID input
+    if (arguments.length == 3) {
+      boolean userExists = false;
+      for (Runway user : DataStore.getRunways()) {
+        if (user.getUserId() == Integer.parseInt(arguments[2])) {
+          Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+              user.getWeight(), user.getHeight(), user.getAge());
+          for (Runway neighbor : similar) {
+            System.out.println(neighbor.getUserId());
+          }
+          userExists = true;
+          break;
+        }
+      }
+      if (!userExists) {
+        System.out.println("No user with that ID could be found. "
+            + "Please enter valid ID.");
+      }
+    } else if (arguments.length == 5) { //if coordinate input
+      Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+          Integer.parseInt(arguments[2]),
+          Integer.parseInt(arguments[3]),
+          Integer.parseInt(arguments[4]));
+      for (Runway neighbor : similar) {
+        System.out.println(neighbor.getUserId());
+      }
+    } else {
+      System.out.println("Invalid arguments.");
+    }
+  }
 
-    try {
-      String json = Files.readString(Path.of(arguments[1]));
-      System.out.println(json);
-      Runway[] data = new Gson().fromJson(json, Runway[].class);
-      DataStore.setRunways(data);
-    } catch (IOException e) {
-      System.out.println("ERROR: Unable to read from file " + arguments[1]);
-    } catch (InvalidPathException e) {
-      System.out.println("ERROR: Invalid path " + arguments[1]);
+  private void classifyHelper(Runway[] classify) {
+    Hashtable<String, Integer> zodiac = new Hashtable<>();
+    String[] signs = new String[] {"Aries", "Taurus", "Gemini",
+        "Cancer", "Leo", "Virgo",
+        "Libra", "Scorpio", "Sagittarius",
+        "Capricorn", "Aquarius", "Pisces"};
+    for (Runway user : classify) {
+      zodiac.put(user.getHoroscope(), zodiac.getOrDefault(user.getHoroscope(), 0) + 1);
+    }
+    for (String sign : signs) {
+      System.out.println(sign + ": " + zodiac.getOrDefault(sign, 0));
     }
   }
 
   /**
    * Helper method called when the user runs the users command.
    * Loads the users data from an inputted file into a KDTree.
-   * @param arguments
    */
   private void usersHelper(String[] arguments) {
     //TODO: Checking that arguments are valid
+    if (arguments.length != 2) {
+      System.out.println("ERROR: Invalid number of arguments for users");
+      System.out.println("Usage: users <filepath>");
+      return;
+    }
+
+    try {
+      String json = Files.readString(Path.of(arguments[1]));
+      Runway[] data = new Gson().fromJson(json, Runway[].class);
+      DataStore.setRunways(data);
+      String[] dimensions = new String[] {"weight", "height", "age"};
+      kdTree = new KDTree(data, dimensions);
+      System.out.println("Loaded " + data.length + " users from " + arguments[1]);
+    } catch (IOException e) {
+      System.out.println("ERROR: Unable to read from file " + arguments[1]);
+    } catch (InvalidPathException e) {
+      System.out.println("ERROR: Invalid path " + arguments[1]);
+    }
 
     //TODO: Below code should only run for JSON files
     String filepath = arguments[1];
     FileParser parse = new FileParser(filepath);
-    List<Hashtable<String,String>> user_list = new ArrayList<>();
-    while(true){
+    List<Hashtable<String, String>> userList = new ArrayList<>();
+    while (true) {
       String s = parse.readNewLine();
-      if(s == null){
+      if (s == null) {
         break;
       }
-      Hashtable<String,String> user_data = new Hashtable<String,String>();
+      Hashtable<String, String> userData = new Hashtable<String, String>();
 
       //remove bracket chars
-      s = s.replaceAll("[\\[\\](){}]","");
+      s = s.replaceAll("[\\[\\](){}]", "");
       //split line into key/value pairs
       String[] pairs = s.split(",");
-      //build user_data map
-      for (String pair : pairs){
+      //build userData map
+      for (String pair : pairs) {
         //split pair into key and value
-        pair = pair.replace("\"","");
+        pair = pair.replace("\"", "");
         String[] kv = pair.split(":");
 
         //add pair to data map
-        user_data.put(kv[0],kv[1]);
+        userData.put(kv[0], kv[1]);
       }
-      //add user_data to user_list
-      user_list.add(user_data);
+      //add user_data to userList
+      userList.add(userData);
     }
 
   }
+
 
   /**
    * Helper method called when the user runs the stars command.
    * Creates a new ArrayList of stars, attempts to open the file passed in, loads the stars into
    * the ArrayList and initalises their distances, and prints a confirmation message
+   *
    * @param arguments the array of command line arguments
    */
   private void starsHelper(String[] arguments) {
@@ -274,6 +344,7 @@ public final class Main {
    * Helper method that checks for errors in a line of the input file.
    * It checks if the star data is in the correct format and prints an appropriate error message
    * if not
+   *
    * @param starData a line of the input file in the format:
    *                 StarID, Star Name, X, Y, Z
    * @return true if there's an error, false otherwise
@@ -310,6 +381,7 @@ public final class Main {
    * Checks for command validity, printing an appropriate error message if invalid.
    * Prints an appropriate error message if the naive_neighbors command is run before the star
    * command.
+   *
    * @param arguments the list of command line arguments
    */
   private void naiveNeighborsHelper(String[] arguments) {
@@ -348,10 +420,11 @@ public final class Main {
   /**
    * Helper method that calculates the distance for all stars relative to a single star/location.
    * Calls the kStars method to calculate and print the nearest k stars.
+   *
    * @param starData the star or set of coordinates relative to which distance for every other
    *                 star is to be calculated
    * @param k the number of stars whose IDs to print, passed as a parameter to the kStars method,
-   *         which prints the stars
+   *                 which prints the stars
    */
   private void distanceMaker(ArrayList<String> starData, int k) {
     int initialSize = stars.size();
@@ -360,7 +433,7 @@ public final class Main {
     double baseX = Double.parseDouble(starData.get(2)), baseY = Double.parseDouble(starData.get(3)),
         baseZ = Double.parseDouble(starData.get(4));
 
-    for (ArrayList<String> star: stars) {
+    for (ArrayList<String> star : stars) {
       double currentX = Double.parseDouble(star.get(2)), currentY =
           Double.parseDouble(star.get(3)),
           currentZ = Double.parseDouble(star.get(4));
@@ -384,6 +457,7 @@ public final class Main {
   /**
    * Helper method that determines which stars to print, including randomisation of equidistant
    * stars, and prints the star IDs.
+   *
    * @param k the number of star IDs to be printed
    */
   private void kStars(int k) {
