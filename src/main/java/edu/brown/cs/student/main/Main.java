@@ -104,7 +104,9 @@ public final class Main {
             }
           }
           String[] arguments = matchList.toArray(new String[0]);
-
+          if (arguments.length == 0) {
+            continue;
+          }
           switch (arguments[0]) {
             case "add":
               try {
@@ -147,50 +149,53 @@ public final class Main {
               similarHelper(arguments);
               break;
             case "classify":
-              if (kdTree == null) {
-                System.out.println("No KD Tree found. "
-                    + "Load a KD Tree using the \"users\" command first.");
-                break;
-              }
-              if (arguments.length == 3) {
-                boolean userExists = false;
-                for (Runway user : DataStore.getRunways()) {
-                  if (user.getUserId() == Integer.parseInt(arguments[2])) {
-                    Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                        user.getWeight(), user.getHeight(), user.getAge());
-                    classifyHelper(classify);
-                    userExists = true;
-                    break;
-                  }
-                }
-                if (!userExists) {
-                  System.out.println("No user with that ID could be found. "
-                      + "Please enter valid ID.");
-                }
-              } else if (arguments.length == 5) {
-                Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                    Integer.parseInt(arguments[2]),
-                    Integer.parseInt(arguments[3]),
-                    Integer.parseInt(arguments[4]));
-                classifyHelper(classify);
-                break;
-              } else {
-                System.out.println("Invalid arguments.");
-                break;
-              }
+              classifyReplHelper(arguments);
               break;
             default:
               System.out.println("ERROR: invalid command.");
               System.out.println("Valid commands: stars, naive_neighbors, get_users, get_rents, "
-                  + "get_reviews, users");
+                  + "get_reviews, users, similar, classify");
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
+          e.printStackTrace();
         }
       }
     } catch (Exception e) {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
+    }
+  }
+
+  private void classifyReplHelper(String[] arguments) {
+    if (kdTree == null) {
+      System.out.println("No KD Tree found. "
+          + "Load a KD Tree using the \"users\" command first.");
+      return;
+    }
+    if (arguments.length == 3) {
+      boolean userExists = false;
+      for (Runway user : DataStore.getRunways()) {
+        if (user.getUserId() == Integer.parseInt(arguments[2])) {
+          Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+              user.getWeight(), user.getHeight(), user.getAge());
+          classifyHelper(classify);
+          userExists = true;
+          break;
+        }
+      }
+      if (!userExists) {
+        System.out.println("No user with that ID could be found. "
+            + "Please enter valid ID.");
+      }
+    } else if (arguments.length == 5) {
+      Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+          Integer.parseInt(arguments[2]),
+          Integer.parseInt(arguments[3]),
+          Integer.parseInt(arguments[4]));
+      classifyHelper(classify);
+    } else {
+      System.out.println("Invalid arguments.");
     }
   }
 
@@ -258,7 +263,13 @@ public final class Main {
     }
 
     try {
-      String json = Files.readString(Path.of(arguments[1]));
+      String json = Files.readString(Path.of(arguments[1])).strip();
+      if (json.endsWith(",")) {
+        json = json.substring(0, json.length()-1);
+      }
+      if (!json.startsWith("[")) {
+        json = "[" + json + "]";
+      }
       Runway[] data = new Gson().fromJson(json, Runway[].class);
       DataStore.setRunways(data);
       String[] dimensions = new String[] {"weight", "height", "age"};
@@ -269,35 +280,6 @@ public final class Main {
     } catch (InvalidPathException e) {
       System.out.println("ERROR: Invalid path " + arguments[1]);
     }
-
-    //TODO: Below code should only run for JSON files
-    String filepath = arguments[1];
-    FileParser parse = new FileParser(filepath);
-    List<Hashtable<String, String>> userList = new ArrayList<>();
-    while (true) {
-      String s = parse.readNewLine();
-      if (s == null) {
-        break;
-      }
-      Hashtable<String, String> userData = new Hashtable<String, String>();
-
-      //remove bracket chars
-      s = s.replaceAll("[\\[\\](){}]", "");
-      //split line into key/value pairs
-      String[] pairs = s.split(",");
-      //build userData map
-      for (String pair : pairs) {
-        //split pair into key and value
-        pair = pair.replace("\"", "");
-        String[] kv = pair.split(":");
-
-        //add pair to data map
-        userData.put(kv[0], kv[1]);
-      }
-      //add user_data to userList
-      userList.add(userData);
-    }
-
   }
 
 

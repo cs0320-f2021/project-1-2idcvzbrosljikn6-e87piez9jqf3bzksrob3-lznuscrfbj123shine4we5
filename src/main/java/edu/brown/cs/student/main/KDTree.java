@@ -34,9 +34,9 @@ public class KDTree {
     axes = dimensions;
     int median = 0;
     if (dataArr.length % 2 == 0) {
-      median = dataArr.length/2;
+      median = dataArr.length / 2;
     } else {
-      median = (dataArr.length - 1)/ 2;
+      median = (dataArr.length - 1) / 2;
     }
     root.data = sortedLists.get(0)[median];
     visited.add(root.data.getUserId());
@@ -120,6 +120,7 @@ public class KDTree {
    * This method returns an inputted user's height,weight, or age as a double.
    */
   public int getNumVal(Runway user, String axis) throws Exception {
+    System.out.println(user);
     switch (axis) {
       case "weight":
         return user.getWeight();
