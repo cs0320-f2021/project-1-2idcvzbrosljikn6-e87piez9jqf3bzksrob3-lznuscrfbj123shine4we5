@@ -34,12 +34,12 @@ public class KDTree {
     axes = dimensions;
     int median = 0;
     if (dataArr.length % 2 == 0) {
-      median = dataArr.length/2;
+      median = dataArr.length / 2;
     } else {
-      median = (dataArr.length - 1)/ 2;
+      median = (dataArr.length - 1) / 2;
     }
     root.data = sortedLists.get(0)[median];
-    visited.add(root.data.getUserId()); 
+    visited.add(root.data.getUserId());
     setupTree(0, root);
   }
 

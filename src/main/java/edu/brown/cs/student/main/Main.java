@@ -259,6 +259,9 @@ public final class Main {
 
     try {
       String json = Files.readString(Path.of(arguments[1]));
+      if (!json.startsWith("[")) {
+        json = "[" + json + "]";
+      }
       Runway[] data = new Gson().fromJson(json, Runway[].class);
       DataStore.setRunways(data);
       String[] dimensions = new String[] {"weight", "height", "age"};
