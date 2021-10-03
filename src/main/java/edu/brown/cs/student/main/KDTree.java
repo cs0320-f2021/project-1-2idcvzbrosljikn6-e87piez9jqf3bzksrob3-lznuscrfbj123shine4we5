@@ -39,7 +39,7 @@ public class KDTree {
       median = (dataArr.length - 1)/ 2;
     }
     root.data = sortedLists.get(0)[median];
-    visited.add(root.data.getUserId()); 
+    visited.add(root.data.getUserId());
     setupTree(0, root);
   }
 
@@ -106,7 +106,7 @@ public class KDTree {
       }
       /*
       If the next user in line is visited, increase i and loop again.
-      Otherwise return true - suitable child exists.
+      Otherwise return true - suitable child exists
        */
       if (visited.contains(array[i + dir].getUserId())) {
         i += dir;
@@ -209,7 +209,9 @@ public class KDTree {
         }
         Runway[] result = knnHelper(k, target, curr.left, neighbors, furthest, axis);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.left, Arrays.asList(result), furthest, axis);
+          return knnHelper(k, target, curr.right, Arrays.asList(result), furthest, axis);
+        } else {
+          return result;
         }
       } else {
         if (axis == axes.length - 1) {
@@ -232,15 +234,21 @@ public class KDTree {
     Else if the current node's coordinate on the relevant axis
     is greater than the target's coordinate on the relevant axis,
     recur on the left child.
+
+    The reason we don't have to account for 0 as an axis distance is you'd
+    never enter this part of the if statement if all the dimensions are the
+    same. To get here, the axis distance has to exceed the furthest Euclidean
+    distance, which means it's impossible for the two to have the same
+    dimensions.
      */
-    if (axisDist > 0 && curr.left != null) {
+    if (axisDist < 0 && curr.left != null) {
       if (axis == axes.length - 1) {
         axis = 0;
       } else {
         axis += 1;
       }
       return knnHelper(k, target, curr.left, neighbors, furthest, axis);
-    } else if (axisDist <= 0 && curr.right != null) {
+    } else if (axisDist > 0 && curr.right != null) {
       if (axis == axes.length - 1) {
         axis = 0;
       } else {
