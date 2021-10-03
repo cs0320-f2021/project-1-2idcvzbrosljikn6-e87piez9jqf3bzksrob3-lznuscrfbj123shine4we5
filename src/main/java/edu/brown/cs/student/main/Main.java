@@ -149,37 +149,7 @@ public final class Main {
               similarHelper(arguments);
               break;
             case "classify":
-              if (kdTree == null) {
-                System.out.println("No KD Tree found. "
-                    + "Load a KD Tree using the \"users\" command first.");
-                break;
-              }
-              if (arguments.length == 3) {
-                boolean userExists = false;
-                for (Runway user : DataStore.getRunways()) {
-                  if (user.getUserId() == Integer.parseInt(arguments[2])) {
-                    Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                        user.getWeight(), user.getHeight(), user.getAge());
-                    classifyHelper(classify);
-                    userExists = true;
-                    break;
-                  }
-                }
-                if (!userExists) {
-                  System.out.println("No user with that ID could be found. "
-                      + "Please enter valid ID.");
-                }
-              } else if (arguments.length == 5) {
-                Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                    Integer.parseInt(arguments[2]),
-                    Integer.parseInt(arguments[3]),
-                    Integer.parseInt(arguments[4]));
-                classifyHelper(classify);
-                break;
-              } else {
-                System.out.println("Invalid arguments.");
-                break;
-              }
+              classifyReplHelper(arguments);
               break;
             default:
               System.out.println("ERROR: invalid command.");
@@ -194,6 +164,38 @@ public final class Main {
     } catch (Exception e) {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
+    }
+  }
+
+  private void classifyReplHelper(String[] arguments) {
+    if (kdTree == null) {
+      System.out.println("No KD Tree found. "
+          + "Load a KD Tree using the \"users\" command first.");
+      return;
+    }
+    if (arguments.length == 3) {
+      boolean userExists = false;
+      for (Runway user : DataStore.getRunways()) {
+        if (user.getUserId() == Integer.parseInt(arguments[2])) {
+          Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+              user.getWeight(), user.getHeight(), user.getAge());
+          classifyHelper(classify);
+          userExists = true;
+          break;
+        }
+      }
+      if (!userExists) {
+        System.out.println("No user with that ID could be found. "
+            + "Please enter valid ID.");
+      }
+    } else if (arguments.length == 5) {
+      Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+          Integer.parseInt(arguments[2]),
+          Integer.parseInt(arguments[3]),
+          Integer.parseInt(arguments[4]));
+      classifyHelper(classify);
+    } else {
+      System.out.println("Invalid arguments.");
     }
   }
 
