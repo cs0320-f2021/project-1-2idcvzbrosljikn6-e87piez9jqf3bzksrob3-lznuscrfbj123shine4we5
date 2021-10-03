@@ -34,5 +34,7 @@ public class ApiSimulator {
 //    User[] users = ac.usersApiCall();
 //    User[] userArray = gson.fromJson(users, User[].class);
 //    System.out.println(Arrays.toString(userArray));
+
+    ac.rentsApiCall();
   }
 }
