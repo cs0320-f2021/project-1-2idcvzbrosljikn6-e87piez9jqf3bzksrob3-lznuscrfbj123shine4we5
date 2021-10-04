@@ -16,10 +16,6 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,7 +78,6 @@ public final class Main {
     }
 
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-      MathBot mathBot = new MathBot();
       String input;
       while ((input = br.readLine()) != null) {
         try {
@@ -107,24 +102,6 @@ public final class Main {
             continue;
           }
           switch (arguments[0]) {
-            case "add":
-              try {
-                System.out.println(mathBot.add(Double.parseDouble(arguments[1]),
-                    Double.parseDouble(arguments[2])));
-              } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("ERROR: invalid usage of add");
-                System.out.println("Correct usage: add <num1> <num2>");
-              }
-              break;
-            case "subtract":
-              try {
-                System.out.println(mathBot.subtract(Double.parseDouble(arguments[1]),
-                    Double.parseDouble(arguments[2])));
-              } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("ERROR: invalid usage of subtract");
-                System.out.println("Correct usage: subtract <num1> <num2>");
-              }
-              break;
             case "get_users":
               client.usersApiCall(false);
               break;
