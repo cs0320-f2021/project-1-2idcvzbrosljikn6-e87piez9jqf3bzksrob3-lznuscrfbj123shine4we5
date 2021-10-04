@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import edu.brown.cs.student.main.DataStore;
 import edu.brown.cs.student.runway.Rent;
 import edu.brown.cs.student.runway.Review;
+import edu.brown.cs.student.runway.Runway;
 import edu.brown.cs.student.runway.User;
 
 import java.io.IOException;
@@ -27,15 +28,29 @@ public class ApiClient {
         .build();
   }
 
-  public void usersApiCall() {
+  public void usersApiCall(boolean loadRunways) {
     String reqUri = "https://runwayapi.herokuapp.com/users-one" + apiAuth;
     String userJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
         .GET().build());
 
+    if (userJson.equals("ERROR")) {
+      String backupUri = "https://runwayapi.herokuapp.com/users-three" + apiAuth;
+      userJson = this.makeRequest(HttpRequest.newBuilder(URI.create(backupUri))
+          .GET().build());
+    }
+
+    if (userJson.equals("ERROR")) {
+      System.out.println("Failed to retrieve user data.");
+      return;
+    }
     try {
-      DataStore.setUsers(new Gson().fromJson(userJson, User[].class));
+      if (loadRunways) {
+        DataStore.setRunways(new Gson().fromJson(userJson, Runway[].class));
+      } else {
+        DataStore.setUsers(new Gson().fromJson(userJson, User[].class));
+      }
     } catch (JsonSyntaxException e) {
-      System.out.println("ERROR: fill in here");
+      System.out.println("ERROR: invalid JSON syntax received from users API call");
     }
   }
 
@@ -44,10 +59,20 @@ public class ApiClient {
     String reviewJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
         .GET().build());
 
+    if (reviewJson.equals("ERROR")) {
+      String backupUri = "https://runwayapi.herokuapp.com/reviews-four" + apiAuth;
+      reviewJson = this.makeRequest(HttpRequest.newBuilder(URI.create(backupUri))
+          .GET().build());
+    }
+    if (reviewJson.equals("ERROR")) {
+      System.out.println("Failed to retrieve review data.");
+      return;
+    }
+
     try {
       DataStore.setReviews(new Gson().fromJson(reviewJson, Review[].class));
     } catch (JsonSyntaxException e) {
-      System.out.println("ERROR: fill in here");
+      System.out.println("ERROR: invalid JSON syntax received from reviews API call");
     }
   }
 
@@ -56,12 +81,23 @@ public class ApiClient {
     String rentsJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
         .GET().build());
 
+    if (rentsJson.equals("ERROR")) {
+      String backupUri = "https://runwayapi.herokuapp.com/rent-two" + apiAuth;
+      rentsJson = this.makeRequest(HttpRequest.newBuilder(URI.create(backupUri))
+          .GET().build());
+    }
+    if (rentsJson.equals("ERROR")) {
+      System.out.println("Failed to retrieve rent data.");
+      return;
+    }
+
     try {
       DataStore.setRents(new Gson().fromJson(rentsJson, Rent[].class));
     } catch (JsonSyntaxException e) {
-      System.out.println("ERROR: fill in here");
+      System.out.println("ERROR: invalid syntax received from rents API call");
     }
   }
+
 
   private String makeRequest(HttpRequest req) {
     HttpResponse<String> apiResponse = null;
@@ -93,7 +129,7 @@ public class ApiClient {
       }
     }
 
-    if (apiResponse == null) {
+    if (apiResponse == null || !(apiResponse.statusCode() >= 200 && apiResponse.statusCode() < 300)) {
       return "ERROR";
     }
 

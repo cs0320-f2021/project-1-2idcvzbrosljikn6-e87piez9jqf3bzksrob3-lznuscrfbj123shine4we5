@@ -133,7 +133,7 @@ public final class Main {
               naiveNeighborsHelper(arguments);
               break;
             case "get_users":
-              client.usersApiCall();
+              client.usersApiCall(false);
               break;
             case "get_rents":
               client.rentsApiCall();
@@ -271,11 +271,15 @@ public final class Main {
    * Loads the users data from an inputted file into a KDTree.
    */
   private void usersHelper(String[] arguments) {
-    //TODO: Checking that arguments are valid
+    //TODO: Checking that arguments are valid AND fix users online command
     if (arguments.length != 2) {
       System.out.println("ERROR: Invalid number of arguments for users");
-      System.out.println("Usage: users <filepath>");
+      System.out.println("Usage: users <filepath> or users online");
       return;
+    }
+
+    if (arguments[1].strip().equals("online")) {
+      client.usersApiCall(true);
     }
 
     try {
