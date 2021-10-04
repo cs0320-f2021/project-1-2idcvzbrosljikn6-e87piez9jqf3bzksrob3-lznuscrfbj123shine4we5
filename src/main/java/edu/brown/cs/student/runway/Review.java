@@ -2,6 +2,9 @@ package edu.brown.cs.student.runway;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class representing review data loaded from the API.
+ */
 public class Review {
   @SerializedName("review_text")
   private String reviewText;

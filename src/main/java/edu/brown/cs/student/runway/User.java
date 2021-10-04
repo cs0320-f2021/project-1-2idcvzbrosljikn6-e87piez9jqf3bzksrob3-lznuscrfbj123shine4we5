@@ -2,6 +2,10 @@ package edu.brown.cs.student.runway;
 
 import com.google.gson.annotations.SerializedName;
 
+
+/**
+ * Class representing User data loaded from the API.
+ */
 public class User {
 
   @SerializedName("user_id")

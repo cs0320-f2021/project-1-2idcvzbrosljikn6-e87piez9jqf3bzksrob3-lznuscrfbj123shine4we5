@@ -2,6 +2,10 @@ package edu.brown.cs.student.runway;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class representing Runway data loaded from the API or from a file.
+ * Runway contains all attributes the others do, so there should be no errors - gson handles it.
+ */
 public class Runway {
 
   private String fit;
