@@ -160,23 +160,28 @@ public final class Main {
     }
   }
 
+  /**
+   * Helper method called when the user runs the classify command.
+   * @param arguments the array of command line arguments
+   */
   private void classifyReplHelper(String[] arguments) {
     if (kdTree == null) {
       System.out.println("No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
     }
+    // if userID input
     if (arguments.length == 3) {
       boolean userExists = false;
       for (Runway user : DataStore.getRunways()) {
         try {
-        if (user.getUserId() == Integer.parseInt(arguments[2])) {
-          Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                  user.getWeight(), user.getHeight(), user.getAge());
-          classifyHelper(classify);
-          userExists = true;
-          break;
-        }
+          if (user.getUserId() == Integer.parseInt(arguments[2])) {
+            Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                    user.getWeight(), user.getHeight(), user.getAge());
+            classifyHelper(classify);
+            userExists = true;
+            break; // if we've found the user, break out of the loop
+          }
         } catch (NumberFormatException e) {
           System.out.println("Incorrect input format.");
         }
@@ -200,13 +205,17 @@ public final class Main {
     }
   }
 
+  /**
+   * Helper method called when the similar command is run
+   * @param arguments the array of command line arguments
+   */
   private void similarHelper(String[] arguments) {
     if (kdTree == null) {
       System.out.println("No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
     }
-    //if userID input
+    // if userID input
     if (arguments.length == 3) {
       boolean userExists = false;
       for (Runway user : DataStore.getRunways()) {
@@ -245,6 +254,11 @@ public final class Main {
     }
   }
 
+  /**
+   * Helper method called in the classifyReplHelper method to print the nearest neighbours zodiac
+   * table.
+   * @param classify the array of users (Runway) to print the zodiacs of
+   */
   private void classifyHelper(Runway[] classify) {
     Hashtable<String, Integer> zodiac = new Hashtable<>();
     String[] signs = new String[] {"Aries", "Taurus", "Gemini",
@@ -262,6 +276,7 @@ public final class Main {
   /**
    * Helper method called when the user runs the users command.
    * Loads the users data from an inputted file into a KDTree.
+   * @param arguments the array of command line arguments
    */
   private void usersHelper(String[] arguments) {
     //TODO: Checking that arguments are valid AND fix users online command
@@ -271,7 +286,8 @@ public final class Main {
       return;
     }
 
-    boolean usersLoaded = false;
+    boolean usersLoaded = false; // tracks whether "users online" has been invoked or "users
+    // <filename>"
     if (arguments[1].strip().equals("online")) {
       client.usersApiCall(true);
       usersLoaded = true;
@@ -279,14 +295,8 @@ public final class Main {
 
     try {
       Runway[] data;
-      if (!usersLoaded) {
-        String json = Files.readString(Path.of(arguments[1])).strip();
-        if (json.endsWith(",")) {
-          json = json.substring(0, json.length()-1);
-        }
-        if (!json.startsWith("[")) {
-          json = "[" + json + "]";
-        }
+      if (!usersLoaded) { // if data hasn't already been loaded through the API
+        String json = ApiClient.normaliseJson(Files.readString(Path.of(arguments[1])).strip());
         data = new Gson().fromJson(json, Runway[].class);
         DataStore.setRunways(data);
       } else {
@@ -301,42 +311,6 @@ public final class Main {
     } catch (InvalidPathException e) {
       System.out.println("ERROR: Invalid path " + arguments[1]);
     }
-  }
-
-  /**
-   * Helper method that checks for errors in a line of the input file.
-   * It checks if the star data is in the correct format and prints an appropriate error message
-   * if not
-   *
-   * @param starData a line of the input file in the format:
-   *                 StarID, Star Name, X, Y, Z
-   * @return true if there's an error, false otherwise
-   */
-  private boolean starDataErrorHelper(String[] starData) {
-    if (starData[0].equals("")) {
-      System.out.println("Error: missing StarID. Skipping this star.");
-      return true;
-    } else {
-      try {
-        Double.parseDouble(starData[2]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: X value non-numeric. Skipping this star.");
-        return true;
-      }
-      try {
-        Double.parseDouble(starData[3]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: Y value non-numeric. Skipping this star.");
-        return true;
-      }
-      try {
-        Double.parseDouble(starData[4]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: Z value non-numeric. Skipping this star.");
-        return true;
-      }
-    }
-    return false;
   }
 
   private static FreeMarkerEngine createEngine() {

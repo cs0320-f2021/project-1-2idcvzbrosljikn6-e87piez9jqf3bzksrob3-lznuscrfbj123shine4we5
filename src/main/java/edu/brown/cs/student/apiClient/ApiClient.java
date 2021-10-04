@@ -43,6 +43,9 @@ public class ApiClient {
       System.out.println("Failed to retrieve user data.");
       return;
     }
+
+    userJson = normaliseJson(userJson); // checks if json data is in correct format
+
     try {
       if (loadRunways) {
         DataStore.setRunways(new Gson().fromJson(userJson, Runway[].class));
@@ -69,6 +72,8 @@ public class ApiClient {
       return;
     }
 
+    reviewJson = normaliseJson(reviewJson);
+
     try {
       DataStore.setReviews(new Gson().fromJson(reviewJson, Review[].class));
     } catch (JsonSyntaxException e) {
@@ -91,13 +96,14 @@ public class ApiClient {
       return;
     }
 
+    rentsJson = normaliseJson(rentsJson);
+
     try {
       DataStore.setRents(new Gson().fromJson(rentsJson, Rent[].class));
     } catch (JsonSyntaxException e) {
       System.out.println("ERROR: invalid syntax received from rents API call");
     }
   }
-
 
   private String makeRequest(HttpRequest req) {
     HttpResponse<String> apiResponse = null;
@@ -133,5 +139,15 @@ public class ApiClient {
     }
 
     return apiResponse.body();
+  }
+
+  public static String normaliseJson(String json) {
+    if (json.endsWith(",")) {
+      json = json.substring(0, json.length()-1);
+    }
+    if (!json.startsWith("[")) {
+      json = "[" + json + "]";
+    }
+    return json;
   }
 }
