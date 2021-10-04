@@ -140,7 +140,7 @@ public final class Main {
    */
   private void classifyReplHelper(String[] arguments) {
     if (kdTree == null) {
-      System.out.println("No KD Tree found. "
+      System.out.println("ERROR: No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
     }
@@ -157,11 +157,11 @@ public final class Main {
             break; // if we've found the user, break out of the loop
           }
         } catch (NumberFormatException e) {
-          System.out.println("Incorrect input format.");
+          System.out.println("ERROR: Argument not integer.");
         }
       }
       if (!userExists) {
-        System.out.println("No user with that ID could be found. "
+        System.out.println("ERROR: No user with that ID could be found. "
             + "Please enter valid ID.");
       }
     } else if (arguments.length == 5) {
@@ -172,10 +172,10 @@ public final class Main {
                 Integer.parseInt(arguments[4]));
         classifyHelper(classify);
       } catch (NumberFormatException e) {
-        System.out.println("Incorrect input format.");
+        System.out.println("ERROR: Argument not integer.");
       }
     } else {
-      System.out.println("Invalid arguments.");
+      System.out.println("ERROR: Invalid number of arguments for classify.");
     }
   }
 
@@ -185,7 +185,7 @@ public final class Main {
    */
   private void similarHelper(String[] arguments) {
     if (kdTree == null) {
-      System.out.println("No KD Tree found. "
+      System.out.println("ERROR: No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
     }
@@ -208,7 +208,7 @@ public final class Main {
         }
       }
       if (!userExists) {
-        System.out.println("No user with that ID could be found. "
+        System.out.println("ERROR: No user with that ID could be found. "
             + "Please enter valid ID.");
       }
     } else if (arguments.length == 5) { //if coordinate input
@@ -221,10 +221,10 @@ public final class Main {
           System.out.println(neighbor.getUserId());
         }
       } catch (NumberFormatException e) {
-        System.out.println("Incorrect input format.");
+        System.out.println("ERROR: Argument not integer.");
       }
     } else {
-      System.out.println("Invalid arguments.");
+      System.out.println("ERROR: Invalid number of arguments for similar.");
     }
   }
 
