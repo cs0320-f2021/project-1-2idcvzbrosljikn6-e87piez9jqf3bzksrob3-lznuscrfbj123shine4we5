@@ -278,20 +278,28 @@ public final class Main {
       return;
     }
 
+    boolean usersLoaded = false;
     if (arguments[1].strip().equals("online")) {
       client.usersApiCall(true);
+      usersLoaded = true;
     }
 
     try {
-      String json = Files.readString(Path.of(arguments[1])).strip();
-      if (json.endsWith(",")) {
-        json = json.substring(0, json.length()-1);
+      Runway[] data;
+      if (!usersLoaded) {
+        String json = Files.readString(Path.of(arguments[1])).strip();
+        if (json.endsWith(",")) {
+          json = json.substring(0, json.length()-1);
+        }
+        if (!json.startsWith("[")) {
+          json = "[" + json + "]";
+        }
+        data = new Gson().fromJson(json, Runway[].class);
+        DataStore.setRunways(data);
+      } else {
+        data = DataStore.getRunways();
       }
-      if (!json.startsWith("[")) {
-        json = "[" + json + "]";
-      }
-      Runway[] data = new Gson().fromJson(json, Runway[].class);
-      DataStore.setRunways(data);
+
       String[] dimensions = new String[] {"weight", "height", "age"};
       kdTree = new KDTree(data, dimensions);
       System.out.println("Loaded " + data.length + " users from " + arguments[1]);
