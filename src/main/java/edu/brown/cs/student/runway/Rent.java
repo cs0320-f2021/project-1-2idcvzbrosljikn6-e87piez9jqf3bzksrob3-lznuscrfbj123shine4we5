@@ -25,34 +25,58 @@ public class Rent {
   private int size;
   private int id;
 
+  /**
+   * @return the rentedFor attribute
+   */
   public String getRentedFor() {
     return rentedFor;
   }
 
+  /**
+   * @return the fit attribute
+   */
   public String getFit() {
     return fit;
   }
 
+  /**
+   * @return the userId attribute
+   */
   public int getUserId() {
     return userId;
   }
 
+  /**
+   * @return the itemId attribute
+   */
   public int getItemId() {
     return itemId;
   }
 
+  /**
+   * @return the rating attribute
+   */
   public int getRating() {
     return rating;
   }
 
+  /**
+   * @return the category attribute
+   */
   public String getCategory() {
     return category;
   }
 
+  /**
+   * @return the size attribute
+   */
   public int getSize() {
     return size;
   }
 
+  /**
+   * @return the id attribute
+   */
   public int getId() {
     return id;
   }
