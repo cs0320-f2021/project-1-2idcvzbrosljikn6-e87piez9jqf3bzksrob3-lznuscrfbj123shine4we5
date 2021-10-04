@@ -2,7 +2,6 @@ package edu.brown.cs.student.main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -11,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +180,7 @@ public final class Main {
   }
 
   /**
-   * Helper method called when the similar command is run
+   * Helper method called when the similar command is run.
    * @param arguments the array of command line arguments
    */
   private void similarHelper(String[] arguments) {

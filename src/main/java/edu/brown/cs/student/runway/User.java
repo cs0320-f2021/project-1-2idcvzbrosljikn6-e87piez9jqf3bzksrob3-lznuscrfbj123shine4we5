@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class User {
 
+  public static final int FEET_MULTIPLIER = 12;
   @SerializedName("user_id")
   private int userId;
   private String weight;
@@ -47,7 +48,7 @@ public class User {
    */
   public int getHeight() {
     String[] nums = height.replace("\"", "").split("'");
-    return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
+    return Integer.parseInt(nums[0].strip()) * FEET_MULTIPLIER + Integer.parseInt(nums[1].strip());
   }
 
   /**

@@ -21,6 +21,8 @@ import java.time.Duration;
  */
 public class ApiClient {
 
+  public static final int ACCEPTABLE_STATUS_CODE = 200;
+  public static final int UNACCEPTABLE_STATUS_CODE = 300;
   private final String apiAuth;
   private HttpClient client;
 
@@ -155,12 +157,15 @@ public class ApiClient {
         System.out.println(se.getMessage());
       }
       if (apiResponse != null
-          && apiResponse.statusCode() >= 200 && apiResponse.statusCode() < 300) {
+          && apiResponse.statusCode() >= ACCEPTABLE_STATUS_CODE && apiResponse.statusCode()
+          < UNACCEPTABLE_STATUS_CODE) {
         break; // breaks out of the loop if we had a successful response
       }
     }
 
-    if (apiResponse == null || !(apiResponse.statusCode() >= 200 && apiResponse.statusCode() < 300)) {
+    if (apiResponse == null
+        || !(apiResponse.statusCode() >= ACCEPTABLE_STATUS_CODE && apiResponse.statusCode()
+        < UNACCEPTABLE_STATUS_CODE)) {
       return "ERROR"; // if no successful response
     }
 
@@ -168,13 +173,13 @@ public class ApiClient {
   }
 
   /**
-   * Helper method that checks for json list validity
+   * Helper method that checks for json list validity.
    * @param json a String to normalise
    * @return the normalised String
    */
   public static String normaliseJson(String json) {
     if (json.endsWith(",")) {
-      json = json.substring(0, json.length()-1);
+      json = json.substring(0, json.length() - 1);
     }
     if (!json.startsWith("[")) {
       json = "[" + json + "]";

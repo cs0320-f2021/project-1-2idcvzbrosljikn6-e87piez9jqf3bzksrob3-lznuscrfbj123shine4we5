@@ -14,12 +14,18 @@ import org.junit.Test;
 
 public class RunwayClassesTest {
 
+  public static final int RESULT_LENGTH_1 = 15;
+  public static final int RESULT_LENGTH_2 = 30;
+  public static final int MIN_ID = 10000;
+  public static final int MAX_RATING = 10;
+  public static final int MAX_ID = 10000;
+
   @Test
   public void testUser() {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justusersSMALL.json"));
     User[] data = new Gson().fromJson(json, User[].class);
-    assertEquals(data.length, 15);
+    assertEquals(data.length, RESULT_LENGTH_1);
     for (User u: data) {
       assertNotNull(u.getBodyType());
       assertNotNull(u.getBustSize());
@@ -32,13 +38,13 @@ public class RunwayClassesTest {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/runwaySMALL.json"));
     Runway[] data = new Gson().fromJson(json, Runway[].class);
-    assertEquals(data.length, 30);
+    assertEquals(data.length, RESULT_LENGTH_2);
     for (Runway u: data) {
       assertNotNull(u.getBodyType());
       assertNotNull(u.getBustSize());
       assertNotNull(u.getHoroscope());
-      assertTrue(u.getUserId() > 9999);
-      assertTrue(u.getRating() > 0 && u.getRating() < 11);
+      assertTrue(u.getUserId() >= MAX_ID);
+      assertTrue(u.getRating() > 0 && u.getRating() <= MAX_RATING);
       assertTrue(u.getWeight() != 0);
     }
   }
@@ -48,7 +54,7 @@ public class RunwayClassesTest {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justrentSMALL.json"));
     Rent[] data = new Gson().fromJson(json, Rent[].class);
-    assertEquals(data.length, 30);
+    assertEquals(data.length, RESULT_LENGTH_2);
     for (Rent u: data) {
       assertNotNull(u.getCategory());
       assertNotNull(u.getFit());
@@ -61,7 +67,7 @@ public class RunwayClassesTest {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justreviewsSMALL.json"));
     Review[] data = new Gson().fromJson(json, Review[].class);
-    assertEquals(data.length, 30);
+    assertEquals(data.length, RESULT_LENGTH_2);
     for (Review u: data) {
       assertNotNull(u.getReviewDate());
       assertNotNull(u.getReviewText());
@@ -74,7 +80,7 @@ public class RunwayClassesTest {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justusersSMALL.json"));
     Runway[] data = new Gson().fromJson(json, Runway[].class);
-    assertEquals(data.length, 15);
+    assertEquals(data.length, RESULT_LENGTH_1);
     for (Runway u: data) {
       assertNotNull(u.getBustSize());
       assertNotNull(u.getHoroscope());

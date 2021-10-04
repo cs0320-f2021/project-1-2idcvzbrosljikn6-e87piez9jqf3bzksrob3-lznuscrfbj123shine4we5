@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Runway {
 
+  public static final int FEET_MULTIPLIER = 12;
   private String fit;
 
   @SerializedName("user_id")
@@ -126,7 +127,7 @@ public class Runway {
    */
   public int getHeight() {
     String[] nums = height.replace("\"", "").split("'");
-    return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
+    return Integer.parseInt(nums[0].strip()) * FEET_MULTIPLIER + Integer.parseInt(nums[1].strip());
   }
 
   /**
