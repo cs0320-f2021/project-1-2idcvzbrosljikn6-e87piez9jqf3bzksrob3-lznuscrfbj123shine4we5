@@ -30,7 +30,7 @@ public class ApiClient {
   public void usersApiCall() {
     String reqUri = "https://runwayapi.herokuapp.com/users-one" + apiAuth;
     String userJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
-        .header("x-api-key", apiAuth).GET().build());
+        .GET().build());
 
     try {
       DataStore.setUsers(new Gson().fromJson(userJson, User[].class));
@@ -42,7 +42,7 @@ public class ApiClient {
   public void reviewsApiCall() {
     String reqUri = "https://runwayapi.herokuapp.com/reviews-three" + apiAuth;
     String reviewJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
-        .header("x-api-key", apiAuth).GET().build());
+        .GET().build());
 
     try {
       DataStore.setReviews(new Gson().fromJson(reviewJson, Review[].class));
@@ -54,7 +54,7 @@ public class ApiClient {
   public void rentsApiCall() {
     String reqUri = "https://runwayapi.herokuapp.com/rent-three" + apiAuth;
     String rentsJson = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
-        .header("x-api-key", apiAuth).GET().build());
+        .GET().build());
 
     try {
       DataStore.setRents(new Gson().fromJson(rentsJson, Rent[].class));
