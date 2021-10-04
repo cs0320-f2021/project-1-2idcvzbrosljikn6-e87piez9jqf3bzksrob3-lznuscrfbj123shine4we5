@@ -279,7 +279,6 @@ public final class Main {
    * @param arguments the array of command line arguments
    */
   private void usersHelper(String[] arguments) {
-    //TODO: Checking that arguments are valid AND fix users online command
     if (arguments.length != 2) {
       System.out.println("ERROR: Invalid number of arguments for users");
       System.out.println("Usage: users <filepath> or users online");
