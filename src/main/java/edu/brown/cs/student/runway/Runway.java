@@ -2,6 +2,10 @@ package edu.brown.cs.student.runway;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Class representing Runway data loaded from the API or from a file.
+ * Runway contains all attributes the others do, so there should be no errors - gson handles it.
+ */
 public class Runway {
 
   private String fit;
@@ -40,68 +44,115 @@ public class Runway {
   private int id;
   private String horoscope;
 
-
+  /**
+   * @return the fit attribute
+   */
   public String getFit() {
     return fit;
   }
 
+  /**
+   * @return the userId attribute
+   */
   public int getUserId() {
     return userId;
   }
 
+  /**
+   * @return the bustSize attribute
+   */
   public String getBustSize() {
     return bustSize;
   }
 
+  /**
+   * @return the itemId attribute
+   */
   public int getItemId() {
     return itemId;
   }
 
+  /**
+   * @return the weight attribute, converted to an integer
+   */
   public int getWeight() {
     return Integer.parseInt(weight.substring(0, weight.length() - 3));
   }
 
+  /**
+   * @return the rating attribute
+   */
   public int getRating() {
     return rating;
   }
 
+  /**
+   * @return the rentedFor attribute
+   */
   public String getRentedFor() {
     return rentedFor;
   }
 
+  /**
+   * @return the reviewText attribute
+   */
   public String getReviewText() {
     return reviewText;
   }
 
+  /**
+   * @return the bodyType attribute
+   */
   public String getBodyType() {
     return bodyType;
   }
 
+  /**
+   * @return the reviewSummary attribute
+   */
   public String getReviewSummary() {
     return reviewSummary;
   }
 
+  /**
+   * @return the category attribute
+   */
   public String getCategory() {
     return category;
   }
 
+  /**
+   * @return the height attribute, converted to inches
+   */
   public int getHeight() {
     String[] nums = height.replace("\"", "").split("'");
     return Integer.parseInt(nums[0].strip()) * 12 + Integer.parseInt(nums[1].strip());
   }
 
+  /**
+   * @return the age attribute
+   */
   public int getAge() {
     return age;
   }
 
+  /**
+   * @return the date attribute
+   */
   public String getDate() {
     return date;
   }
 
+  /**
+   * @return the id attribute
+   */
   public int getId() {
     return id;
   }
 
+  /**
+   * @return the horoscope attribute
+   */
   public String getHoroscope() {
     return horoscope;
   }
