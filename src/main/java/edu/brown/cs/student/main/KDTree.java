@@ -120,7 +120,6 @@ public class KDTree {
    * This method returns an inputted user's height,weight, or age as a double.
    */
   public int getNumVal(Runway user, String axis) throws Exception {
-    System.out.println(user);
     switch (axis) {
       case "weight":
         return user.getWeight();

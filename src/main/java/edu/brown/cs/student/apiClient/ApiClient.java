@@ -102,7 +102,6 @@ public class ApiClient {
   private String makeRequest(HttpRequest req) {
     HttpResponse<String> apiResponse = null;
     for (int i = 0; i < 5; i++) {
-      System.out.println(i);
       try {
         apiResponse = client.send(req, HttpResponse.BodyHandlers.ofString());
       } catch (IOException ioe) {
@@ -133,8 +132,6 @@ public class ApiClient {
       return "ERROR";
     }
 
-    System.out.println("Status " + apiResponse.statusCode());
-    System.out.println(apiResponse.body());
     return apiResponse.body();
   }
 }
