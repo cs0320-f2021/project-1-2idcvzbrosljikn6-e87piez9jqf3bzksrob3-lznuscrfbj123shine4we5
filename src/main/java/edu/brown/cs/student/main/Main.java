@@ -176,12 +176,16 @@ public final class Main {
     if (arguments.length == 3) {
       boolean userExists = false;
       for (Runway user : DataStore.getRunways()) {
+        try {
         if (user.getUserId() == Integer.parseInt(arguments[2])) {
           Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-              user.getWeight(), user.getHeight(), user.getAge());
+                  user.getWeight(), user.getHeight(), user.getAge());
           classifyHelper(classify);
           userExists = true;
           break;
+        }
+        } catch (NumberFormatException e) {
+          System.out.println("Incorrect input format.");
         }
       }
       if (!userExists) {
@@ -189,11 +193,15 @@ public final class Main {
             + "Please enter valid ID.");
       }
     } else if (arguments.length == 5) {
-      Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-          Integer.parseInt(arguments[2]),
-          Integer.parseInt(arguments[3]),
-          Integer.parseInt(arguments[4]));
-      classifyHelper(classify);
+      try {
+        Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                Integer.parseInt(arguments[2]),
+                Integer.parseInt(arguments[3]),
+                Integer.parseInt(arguments[4]));
+        classifyHelper(classify);
+      } catch (NumberFormatException e) {
+        System.out.println("Incorrect input format.");
+      }
     } else {
       System.out.println("Invalid arguments.");
     }
@@ -209,14 +217,18 @@ public final class Main {
     if (arguments.length == 3) {
       boolean userExists = false;
       for (Runway user : DataStore.getRunways()) {
-        if (user.getUserId() == Integer.parseInt(arguments[2])) {
-          Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
-              user.getWeight(), user.getHeight(), user.getAge());
-          for (Runway neighbor : similar) {
-            System.out.println(neighbor.getUserId());
+        try {
+          if (user.getUserId() == Integer.parseInt(arguments[2])) {
+            Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+                    user.getWeight(), user.getHeight(), user.getAge());
+            for (Runway neighbor : similar) {
+              System.out.println(neighbor.getUserId());
+            }
+            userExists = true;
+            break;
           }
-          userExists = true;
-          break;
+        } catch (NumberFormatException e) {
+          System.out.println("Incorrect input format.");
         }
       }
       if (!userExists) {
@@ -224,12 +236,16 @@ public final class Main {
             + "Please enter valid ID.");
       }
     } else if (arguments.length == 5) { //if coordinate input
-      Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
-          Integer.parseInt(arguments[2]),
-          Integer.parseInt(arguments[3]),
-          Integer.parseInt(arguments[4]));
-      for (Runway neighbor : similar) {
-        System.out.println(neighbor.getUserId());
+      try {
+        Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+                Integer.parseInt(arguments[2]),
+                Integer.parseInt(arguments[3]),
+                Integer.parseInt(arguments[4]));
+        for (Runway neighbor : similar) {
+          System.out.println(neighbor.getUserId());
+        }
+      } catch (NumberFormatException e) {
+        System.out.println("Incorrect input format.");
       }
     } else {
       System.out.println("Invalid arguments.");

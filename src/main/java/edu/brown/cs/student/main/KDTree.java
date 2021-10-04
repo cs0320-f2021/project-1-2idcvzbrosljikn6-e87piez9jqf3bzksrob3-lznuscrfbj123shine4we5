@@ -170,7 +170,7 @@ public class KDTree {
         furthest = findFurthest(target, neighbors);
       } else if (eDist > furthest[1]) {
         furthest[1] = eDist;
-        furthest[0] = neighbors.indexOf(curr.data);
+        furthest[0] = neighbors.size() - 1;
       }
     }
 
