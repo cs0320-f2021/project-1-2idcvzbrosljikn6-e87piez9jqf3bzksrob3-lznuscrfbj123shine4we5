@@ -1,6 +1,0 @@
-INPUT
-stars 
-OUTPUT
-ERROR: Invalid number of arguments for stars
-Usage: stars <filepath>
-END

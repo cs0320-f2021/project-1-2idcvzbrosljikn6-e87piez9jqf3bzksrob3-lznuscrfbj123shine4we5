@@ -1,5 +1,0 @@
-INPUT
-stars invalid/filepath
-OUTPUT
-ERROR: File not found
-END

@@ -61,7 +61,9 @@ public class ApiClient {
 
     try {
       if (loadRunways) {
-        DataStore.setRunways(new Gson().fromJson(userJson, Runway[].class));
+        Runway[] data = new Gson().fromJson(userJson, Runway[].class);
+        System.out.println("Loaded " + data.length + " users from API endpoint");
+        DataStore.setRunways(data);
       } else {
         DataStore.setUsers(new Gson().fromJson(userJson, User[].class));
       }
@@ -92,7 +94,9 @@ public class ApiClient {
     reviewJson = normaliseJson(reviewJson);
 
     try {
-      DataStore.setReviews(new Gson().fromJson(reviewJson, Review[].class));
+      Review[] data = new Gson().fromJson(reviewJson, Review[].class);
+      System.out.println("Loaded " + data.length + " reviews from API endpoint");
+      DataStore.setReviews(data);
     } catch (JsonSyntaxException e) {
       System.out.println("ERROR: invalid JSON syntax received from reviews API call");
     }
@@ -120,7 +124,9 @@ public class ApiClient {
     rentsJson = normaliseJson(rentsJson);
 
     try {
-      DataStore.setRents(new Gson().fromJson(rentsJson, Rent[].class));
+      Rent[] data = new Gson().fromJson(rentsJson, Rent[].class);
+      System.out.println("Loaded " + data.length + " rents from API endpoint");
+      DataStore.setRents(data);
     } catch (JsonSyntaxException e) {
       System.out.println("ERROR: invalid syntax received from rents API call");
     }
