@@ -46,7 +46,6 @@ public final class Main {
 
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
-  private ArrayList<ArrayList<String>> stars;
   private KDTree kdTree = null;
 
   /**
@@ -126,12 +125,6 @@ public final class Main {
                 System.out.println("Correct usage: subtract <num1> <num2>");
               }
               break;
-            case "stars":
-              starsHelper(arguments);
-              break;
-            case "naive_neighbors":
-              naiveNeighborsHelper(arguments);
-              break;
             case "get_users":
               client.usersApiCall(false);
               break;
@@ -153,7 +146,7 @@ public final class Main {
               break;
             default:
               System.out.println("ERROR: invalid command.");
-              System.out.println("Valid commands: stars, naive_neighbors, get_users, get_rents, "
+              System.out.println("Valid commands: get_users, get_rents, "
                   + "get_reviews, users, similar, classify");
           }
         } catch (Exception e) {
@@ -310,46 +303,6 @@ public final class Main {
     }
   }
 
-
-  /**
-   * Helper method called when the user runs the stars command.
-   * Creates a new ArrayList of stars, attempts to open the file passed in, loads the stars into
-   * the ArrayList and initalises their distances, and prints a confirmation message
-   *
-   * @param arguments the array of command line arguments
-   */
-  private void starsHelper(String[] arguments) {
-    if (arguments.length != 2) {
-      System.out.println("ERROR: Invalid number of arguments for stars");
-      System.out.println("Usage: stars <filepath>");
-      return;
-    }
-
-    stars = new ArrayList<>(); // creates new ArrayList whenever the stars command is used
-
-    try {
-      File file = new File(arguments[1]);
-      Scanner scanner = new Scanner(file);
-
-      while (scanner.hasNextLine()) {
-        String[] starData = scanner.nextLine().split(",");
-        if (!starData[0].equals("StarID")) {
-          if (starDataErrorHelper(starData)) { // checks for incorrect data format in each line
-            continue;
-          }
-          // converts star array data to an ArrayList
-          ArrayList<String> star = new ArrayList<>(Arrays.asList(starData));
-          star.add("0");
-          stars.add(star);
-        }
-      }
-      System.out.println("Read " + stars.size() + " stars from " + arguments[1]);
-    } catch (FileNotFoundException e) {
-      System.out.println("ERROR: File not found");
-    }
-
-  }
-
   /**
    * Helper method that checks for errors in a line of the input file.
    * It checks if the star data is in the correct format and prints an appropriate error message
@@ -384,116 +337,6 @@ public final class Main {
       }
     }
     return false;
-  }
-
-  /**
-   * Private helper method called when the user runs the naive_neighbors command.
-   * Checks for command validity, printing an appropriate error message if invalid.
-   * Prints an appropriate error message if the naive_neighbors command is run before the star
-   * command.
-   *
-   * @param arguments the list of command line arguments
-   */
-  private void naiveNeighborsHelper(String[] arguments) {
-    if (arguments.length != 5 && arguments.length != 3) {
-      System.out.println("ERROR: Invalid number of arguments for naive_neighbors");
-      System.out.println("naive_neighbors <k> <\"name\">");
-      System.out.println("Usage: naive_neighbors <k> <x> <y> <z>");
-      return;
-    }
-
-    if (stars == null || stars.isEmpty()) { // the stars command needs to be run before
-      // naive_neighbors
-      System.out.println("ERROR: You must run the stars command before running the naive_neighbors "
-          + "command!");
-      System.out.println("Usage: stars <filepath>");
-      return;
-    }
-
-    if (arguments.length == 3) { // if the command is of the format stars <k> <starName>
-      String starName = arguments[2].replace("\"", "");
-      Optional<ArrayList<String>> starData =
-          stars.stream().filter(a -> a.get(1).equals(starName)).findFirst();
-      try {
-        distanceMaker(starData.orElseThrow(), Integer.parseInt(arguments[1]));
-      } catch (NoSuchElementException e) {
-        System.out.println("ERROR: star passed in does not exist");
-      }
-    } else { // if the command is of the format stars <k> <x> <y> <z>
-      // creates a new ArrayList with the location data, mimicking a star
-      distanceMaker(new ArrayList<>(Arrays.asList("NULL", "NULL", arguments[2],
-          arguments[3], arguments[4], "0")), Integer.parseInt(arguments[1]));
-    }
-
-  }
-
-  /**
-   * Helper method that calculates the distance for all stars relative to a single star/location.
-   * Calls the kStars method to calculate and print the nearest k stars.
-   *
-   * @param starData the star or set of coordinates relative to which distance for every other
-   *                 star is to be calculated
-   * @param k the number of stars whose IDs to print, passed as a parameter to the kStars method,
-   *                 which prints the stars
-   */
-  private void distanceMaker(ArrayList<String> starData, int k) {
-    int initialSize = stars.size();
-    // removes either the star passed in or the simulated star so it doesn't show up in the k stars
-    stars.remove(starData);
-    double baseX = Double.parseDouble(starData.get(2)), baseY = Double.parseDouble(starData.get(3)),
-        baseZ = Double.parseDouble(starData.get(4));
-
-    for (ArrayList<String> star : stars) {
-      double currentX = Double.parseDouble(star.get(2)), currentY =
-          Double.parseDouble(star.get(3)),
-          currentZ = Double.parseDouble(star.get(4));
-
-      double distance =
-          Math.sqrt(Math.pow(baseX - currentX, 2)
-              + Math.pow(baseY - currentY, 2)
-              + Math.pow(baseZ - currentZ, 2));
-
-      star.set(5, String.valueOf(distance));
-    }
-
-    // sorts the ArrayList of stars based on the numeric value of the distance
-    stars.sort(Comparator.comparing(s -> Double.parseDouble(s.get(5))));
-    kStars(k); // calculates, prints nearest k stars
-    if (initialSize > stars.size()) { // if we removed a star earlier, add it back
-      stars.add(starData);
-    }
-  }
-
-  /**
-   * Helper method that determines which stars to print, including randomisation of equidistant
-   * stars, and prints the star IDs.
-   *
-   * @param k the number of star IDs to be printed
-   */
-  private void kStars(int k) {
-    if (stars.size() < k) { // if we want fewer stars than we have, print them all
-      stars.forEach(s -> System.out.println(s.get(0)));
-    } else if (k > 0) {
-      ArrayList<String> star = stars.get(k - 1);
-      ArrayList<String> kStars = new ArrayList<>();
-      ArrayList<String> equalStars = new ArrayList<>();
-      stars.forEach(s -> {
-        if (Double.parseDouble(s.get(5)) < Double.parseDouble(star.get(5))) {
-          kStars.add(s.get(0));
-        } else if (s.get(5).equals(star.get(5))) {
-          equalStars.add(s.get(0));
-        }
-      });
-
-      int requiredNumber = k - kStars.size();
-
-      Random rand = new Random();
-      for (int i = 0; i < requiredNumber; i++) {
-        int randInt = rand.nextInt(equalStars.size());
-        kStars.add(equalStars.remove(randInt)); // adds randomly selected star to k stars
-      }
-      kStars.forEach(System.out::println);
-    }
   }
 
   private static FreeMarkerEngine createEngine() {
