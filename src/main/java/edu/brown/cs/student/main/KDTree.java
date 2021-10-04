@@ -256,7 +256,7 @@ public class KDTree {
       }
       return knnHelper(k, target, curr.right, neighbors, furthest, axis);
     }
-    return null;
+    return neighbors.toArray(new Runway[0]);
   }
 
   /*
