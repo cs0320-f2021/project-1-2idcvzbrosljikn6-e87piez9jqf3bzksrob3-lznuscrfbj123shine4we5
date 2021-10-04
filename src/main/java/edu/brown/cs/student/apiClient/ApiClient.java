@@ -139,10 +139,7 @@ public class ApiClient {
     for (int i = 0; i < 5; i++) {
       try {
         apiResponse = client.send(req, HttpResponse.BodyHandlers.ofString());
-      } catch (IOException ioe) {
-        System.out.println("An I/O error occurred when sending or receiving data.");
-        System.out.println(ioe.getMessage());
-
+      } catch (IOException ignored) { // ignore because timeouts may occur, just ignore them
       } catch (InterruptedException ie) {
         System.out.println("The operation was interrupted.");
         System.out.println(ie.getMessage());
