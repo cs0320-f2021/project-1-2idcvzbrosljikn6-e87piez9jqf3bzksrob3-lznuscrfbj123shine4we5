@@ -1,0 +1,21 @@
+INPUT
+classify
+similar
+users data/project-1/justusersSMALL.json
+classify 1
+similar 1
+classify 1 2 3
+similar 1 2 3
+classify 1 2
+similar 1 2
+OUTPUT
+ERROR: No KD Tree found. Load a KD Tree using the "users" command first.
+ERROR: No KD Tree found. Load a KD Tree using the "users" command first.
+Loaded 15 users from data/project-1/justusersSMALL.json
+ERROR: Invalid number of arguments for classify.
+ERROR: Invalid number of arguments for similar.
+ERROR: Invalid number of arguments for classify.
+ERROR: Invalid number of arguments for similar.
+ERROR: No user with that ID could be found. Please enter valid ID.
+ERROR: No user with that ID could be found. Please enter valid ID.
+END

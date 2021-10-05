@@ -1,0 +1,31 @@
+INPUT
+users data/project-1/runwaySMALL.json
+classify 5 420272
+classify 5 137 68 28
+OUTPUT
+Loaded 30 users from data/project-1/runwaySMALL.json
+Aries: 1
+Taurus: 0
+Gemini: 0
+Cancer: 0
+Leo: 1
+Virgo: 0
+Libra: 1
+Scorpio: 0
+Sagittarius: 1
+Capricorn: 0
+Aquarius: 1
+Pisces: 0
+Aries: 1
+Taurus: 0
+Gemini: 0
+Cancer: 0
+Leo: 1
+Virgo: 0
+Libra: 1
+Scorpio: 0
+Sagittarius: 1
+Capricorn: 0
+Aquarius: 1
+Pisces: 0
+END

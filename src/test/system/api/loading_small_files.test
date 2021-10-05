@@ -1,0 +1,7 @@
+INPUT
+users data/project-1/justusersSMALL.json
+users data/project-1/runwaySMALL.json
+OUTPUT
+Loaded 15 users from data/project-1/justusersSMALL.json
+Loaded 30 users from data/project-1/runwaySMALL.json
+END

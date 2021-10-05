@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 
 /**
  * A generic file parser.
@@ -43,5 +46,17 @@ public class FileParser {
     } else {
       return null;
     }
+  }
+
+  public static String readIntoString(String arg) {
+    try {
+      String json = Files.readString(Path.of(arg)).strip();
+      return json;
+    } catch (IOException e) {
+      System.out.println("ERROR: Unable to read from file " + arg);
+    } catch (InvalidPathException e) {
+      System.out.println("ERROR: Invalid path " + arg);
+    }
+    return "ERROR";
   }
 }

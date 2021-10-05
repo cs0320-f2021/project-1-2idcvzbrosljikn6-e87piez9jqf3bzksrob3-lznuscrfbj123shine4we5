@@ -1,0 +1,10 @@
+INPUT
+users
+users data/project-1/justusersSMAL.json
+users data/project-1/runwaySMAL.json
+OUTPUT
+ERROR: Invalid number of arguments for users
+Usage: users <filepath> or users online
+ERROR: Unable to read from file data/project-1/justusersSMAL.json
+ERROR: Unable to read from file data/project-1/runwaySMAL.json
+END

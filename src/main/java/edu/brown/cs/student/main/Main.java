@@ -2,27 +2,25 @@ package edu.brown.cs.student.main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
 
+import com.google.gson.Gson;
+import edu.brown.cs.student.apiClient.ApiClient;
+import edu.brown.cs.student.runway.Runway;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -41,8 +39,7 @@ public final class Main {
 
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
-  private ArrayList<ArrayList<String>> stars;
-  private KDTree kdtree;
+  private KDTree kdTree = null;
 
   /**
    * The initial method called when execution begins.
@@ -54,9 +51,11 @@ public final class Main {
   }
 
   private String[] args;
+  private ApiClient client;
 
   private Main(String[] args) {
     this.args = args;
+    this.client = new ApiClient();
   }
 
   private void run() {
@@ -76,7 +75,6 @@ public final class Main {
     }
 
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-      MathBot mathBot = new MathBot();
       String input;
       while ((input = br.readLine()) != null) {
         try {
@@ -97,274 +95,194 @@ public final class Main {
             }
           }
           String[] arguments = matchList.toArray(new String[0]);
-
+          if (arguments.length == 0) {
+            continue;
+          }
           switch (arguments[0]) {
-            case "add":
-              try {
-                System.out.println(mathBot.add(Double.parseDouble(arguments[1]),
-                    Double.parseDouble(arguments[2])));
-              } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("ERROR: invalid usage of add");
-                System.out.println("Correct usage: add <num1> <num2>");
-              }
+            case "get_users":
+              client.usersApiCall(false);
               break;
-            case "subtract":
-              try {
-                System.out.println(mathBot.subtract(Double.parseDouble(arguments[1]),
-                    Double.parseDouble(arguments[2])));
-              } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("ERROR: invalid usage of subtract");
-                System.out.println("Correct usage: subtract <num1> <num2>");
-              }
+            case "get_rents":
+              client.rentsApiCall();
               break;
-            case "stars":
-              starsHelper(arguments);
-              break;
-            case "naive_neighbors":
-              naiveNeighborsHelper(arguments);
+            case "get_reviews":
+              client.reviewsApiCall();
               break;
             case "users":
-              // TODO: Load in user data to a KDTree by saying users [file location]
               usersHelper(arguments);
               break;
             case "similar":
-              // TODO: Print out the user_ids of the most similar k users to an ID by saying:
-              // similar k [ID]
-              // similar k [weight] [height] [age]
+              //if no tree has been loaded yet
+              similarHelper(arguments);
               break;
             case "classify":
-              //TODO: print out horoscope comparison chart of the k most similar users
+              classifyReplHelper(arguments);
               break;
             default:
               System.out.println("ERROR: invalid command.");
-              System.out.println("Valid commands: stars, naive_neighbors");
+              System.out.println("Valid commands: get_users, get_rents, "
+                  + "get_reviews, users, similar, classify");
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
+          e.printStackTrace();
         }
       }
     } catch (Exception e) {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
     }
+  }
 
+  /**
+   * Helper method called when the user runs the classify command.
+   * @param arguments the array of command line arguments
+   */
+  private void classifyReplHelper(String[] arguments) {
+    if (kdTree == null) {
+      System.out.println("ERROR: No KD Tree found. "
+          + "Load a KD Tree using the \"users\" command first.");
+      return;
+    }
+    // if userID input
+    if (arguments.length == 3) {
+      boolean userExists = false;
+      for (Runway user : DataStore.getRunways()) {
+        try {
+          if (user.getUserId() == Integer.parseInt(arguments[2])) {
+            Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                    user.getWeight(), user.getHeight(), user.getAge());
+            classifyHelper(classify);
+            userExists = true;
+            break; // if we've found the user, break out of the loop
+          }
+        } catch (NumberFormatException e) {
+          System.out.println("ERROR: Argument not integer.");
+        }
+      }
+      if (!userExists) {
+        System.out.println("ERROR: No user with that ID could be found. "
+            + "Please enter valid ID.");
+      }
+    } else if (arguments.length == 5) {
+      try {
+        Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+                Integer.parseInt(arguments[2]),
+                Integer.parseInt(arguments[3]),
+                Integer.parseInt(arguments[4]));
+        classifyHelper(classify);
+      } catch (NumberFormatException e) {
+        System.out.println("ERROR: Argument not integer.");
+      }
+    } else {
+      System.out.println("ERROR: Invalid number of arguments for classify.");
+    }
+  }
+
+  /**
+   * Helper method called when the similar command is run.
+   * @param arguments the array of command line arguments
+   */
+  private void similarHelper(String[] arguments) {
+    if (kdTree == null) {
+      System.out.println("ERROR: No KD Tree found. "
+          + "Load a KD Tree using the \"users\" command first.");
+      return;
+    }
+    // if userID input
+    if (arguments.length == 3) {
+      boolean userExists = false;
+      for (Runway user : DataStore.getRunways()) {
+        try {
+          if (user.getUserId() == Integer.parseInt(arguments[2])) {
+            Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+                    user.getWeight(), user.getHeight(), user.getAge());
+            for (Runway neighbor : similar) {
+              System.out.println(neighbor.getUserId());
+            }
+            userExists = true;
+            break;
+          }
+        } catch (NumberFormatException e) {
+          System.out.println("Incorrect input format.");
+        }
+      }
+      if (!userExists) {
+        System.out.println("ERROR: No user with that ID could be found. "
+            + "Please enter valid ID.");
+      }
+    } else if (arguments.length == 5) { //if coordinate input
+      try {
+        Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+                Integer.parseInt(arguments[2]),
+                Integer.parseInt(arguments[3]),
+                Integer.parseInt(arguments[4]));
+        for (Runway neighbor : similar) {
+          System.out.println(neighbor.getUserId());
+        }
+      } catch (NumberFormatException e) {
+        System.out.println("ERROR: Argument not integer.");
+      }
+    } else {
+      System.out.println("ERROR: Invalid number of arguments for similar.");
+    }
+  }
+
+  /**
+   * Helper method called in the classifyReplHelper method to print the nearest neighbours zodiac
+   * table.
+   * @param classify the array of users (Runway) to print the zodiacs of
+   */
+  private void classifyHelper(Runway[] classify) {
+    Hashtable<String, Integer> zodiac = new Hashtable<>();
+    String[] signs = new String[] {"Aries", "Taurus", "Gemini",
+        "Cancer", "Leo", "Virgo",
+        "Libra", "Scorpio", "Sagittarius",
+        "Capricorn", "Aquarius", "Pisces"};
+    for (Runway user : classify) {
+      zodiac.put(user.getHoroscope(), zodiac.getOrDefault(user.getHoroscope(), 0) + 1);
+    }
+    for (String sign : signs) {
+      System.out.println(sign + ": " + zodiac.getOrDefault(sign, 0));
+    }
   }
 
   /**
    * Helper method called when the user runs the users command.
    * Loads the users data from an inputted file into a KDTree.
-   * @param arguments
-   */
-  private void usersHelper(String[] arguments) {
-    //TODO: Checking that arguments are valid
-
-    //TODO: Below code should only run for JSON files
-    String filepath = arguments[1];
-    FileParser parse = new FileParser(filepath);
-    List<Hashtable<String,String>> user_list = new ArrayList<>();
-    while(true){
-      String s = parse.readNewLine();
-      if(s == null){
-        break;
-      }
-      Hashtable<String,String> user_data = new Hashtable<String,String>();
-
-      //remove bracket chars
-      s = s.replaceAll("[\\[\\](){}]","");
-      //split line into key/value pairs
-      String[] pairs = s.split(",");
-      //build user_data map
-      for (String pair : pairs){
-        //split pair into key and value
-        pair = pair.replace("\"","");
-        String[] kv = pair.split(":");
-
-        //add pair to data map
-        user_data.put(kv[0],kv[1]);
-      }
-      //add user_data to user_list
-      user_list.add(user_data);
-    }
-
-  }
-
-  /**
-   * Helper method called when the user runs the stars command.
-   * Creates a new ArrayList of stars, attempts to open the file passed in, loads the stars into
-   * the ArrayList and initalises their distances, and prints a confirmation message
    * @param arguments the array of command line arguments
    */
-  private void starsHelper(String[] arguments) {
+  private void usersHelper(String[] arguments) {
     if (arguments.length != 2) {
-      System.out.println("ERROR: Invalid number of arguments for stars");
-      System.out.println("Usage: stars <filepath>");
+      System.out.println("ERROR: Invalid number of arguments for users");
+      System.out.println("Usage: users <filepath> or users online");
       return;
     }
 
-    stars = new ArrayList<>(); // creates new ArrayList whenever the stars command is used
+    boolean usersLoaded = false; // tracks whether "users online" has been invoked or "users
+    // <filename>"
+    if (arguments[1].strip().equals("online")) {
+      client.usersApiCall(true);
+      usersLoaded = true;
+    }
 
     try {
-      File file = new File(arguments[1]);
-      Scanner scanner = new Scanner(file);
-
-      while (scanner.hasNextLine()) {
-        String[] starData = scanner.nextLine().split(",");
-        if (!starData[0].equals("StarID")) {
-          if (starDataErrorHelper(starData)) { // checks for incorrect data format in each line
-            continue;
-          }
-          // converts star array data to an ArrayList
-          ArrayList<String> star = new ArrayList<>(Arrays.asList(starData));
-          star.add("0");
-          stars.add(star);
-        }
+      Runway[] data;
+      if (!usersLoaded) { // if data hasn't already been loaded through the API
+        String json = ApiClient.normaliseJson(Files.readString(Path.of(arguments[1])).strip());
+        data = new Gson().fromJson(json, Runway[].class);
+        DataStore.setRunways(data);
+      } else {
+        data = DataStore.getRunways();
       }
-      System.out.println("Read " + stars.size() + " stars from " + arguments[1]);
-    } catch (FileNotFoundException e) {
-      System.out.println("ERROR: File not found");
-    }
 
-  }
-
-  /**
-   * Helper method that checks for errors in a line of the input file.
-   * It checks if the star data is in the correct format and prints an appropriate error message
-   * if not
-   * @param starData a line of the input file in the format:
-   *                 StarID, Star Name, X, Y, Z
-   * @return true if there's an error, false otherwise
-   */
-  private boolean starDataErrorHelper(String[] starData) {
-    if (starData[0].equals("")) {
-      System.out.println("Error: missing StarID. Skipping this star.");
-      return true;
-    } else {
-      try {
-        Double.parseDouble(starData[2]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: X value non-numeric. Skipping this star.");
-        return true;
-      }
-      try {
-        Double.parseDouble(starData[3]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: Y value non-numeric. Skipping this star.");
-        return true;
-      }
-      try {
-        Double.parseDouble(starData[4]);
-      } catch (NumberFormatException e) {
-        System.out.println("Error: Z value non-numeric. Skipping this star.");
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Private helper method called when the user runs the naive_neighbors command.
-   * Checks for command validity, printing an appropriate error message if invalid.
-   * Prints an appropriate error message if the naive_neighbors command is run before the star
-   * command.
-   * @param arguments the list of command line arguments
-   */
-  private void naiveNeighborsHelper(String[] arguments) {
-    if (arguments.length != 5 && arguments.length != 3) {
-      System.out.println("ERROR: Invalid number of arguments for naive_neighbors");
-      System.out.println("naive_neighbors <k> <\"name\">");
-      System.out.println("Usage: naive_neighbors <k> <x> <y> <z>");
-      return;
-    }
-
-    if (stars == null || stars.isEmpty()) { // the stars command needs to be run before
-      // naive_neighbors
-      System.out.println("ERROR: You must run the stars command before running the naive_neighbors "
-          + "command!");
-      System.out.println("Usage: stars <filepath>");
-      return;
-    }
-
-    if (arguments.length == 3) { // if the command is of the format stars <k> <starName>
-      String starName = arguments[2].replace("\"", "");
-      Optional<ArrayList<String>> starData =
-          stars.stream().filter(a -> a.get(1).equals(starName)).findFirst();
-      try {
-        distanceMaker(starData.orElseThrow(), Integer.parseInt(arguments[1]));
-      } catch (NoSuchElementException e) {
-        System.out.println("ERROR: star passed in does not exist");
-      }
-    } else { // if the command is of the format stars <k> <x> <y> <z>
-      // creates a new ArrayList with the location data, mimicking a star
-      distanceMaker(new ArrayList<>(Arrays.asList("NULL", "NULL", arguments[2],
-          arguments[3], arguments[4], "0")), Integer.parseInt(arguments[1]));
-    }
-
-  }
-
-  /**
-   * Helper method that calculates the distance for all stars relative to a single star/location.
-   * Calls the kStars method to calculate and print the nearest k stars.
-   * @param starData the star or set of coordinates relative to which distance for every other
-   *                 star is to be calculated
-   * @param k the number of stars whose IDs to print, passed as a parameter to the kStars method,
-   *         which prints the stars
-   */
-  private void distanceMaker(ArrayList<String> starData, int k) {
-    int initialSize = stars.size();
-    // removes either the star passed in or the simulated star so it doesn't show up in the k stars
-    stars.remove(starData);
-    double baseX = Double.parseDouble(starData.get(2)), baseY = Double.parseDouble(starData.get(3)),
-        baseZ = Double.parseDouble(starData.get(4));
-
-    for (ArrayList<String> star: stars) {
-      double currentX = Double.parseDouble(star.get(2)), currentY =
-          Double.parseDouble(star.get(3)),
-          currentZ = Double.parseDouble(star.get(4));
-
-      double distance =
-          Math.sqrt(Math.pow(baseX - currentX, 2)
-              + Math.pow(baseY - currentY, 2)
-              + Math.pow(baseZ - currentZ, 2));
-
-      star.set(5, String.valueOf(distance));
-    }
-
-    // sorts the ArrayList of stars based on the numeric value of the distance
-    stars.sort(Comparator.comparing(s -> Double.parseDouble(s.get(5))));
-    kStars(k); // calculates, prints nearest k stars
-    if (initialSize > stars.size()) { // if we removed a star earlier, add it back
-      stars.add(starData);
-    }
-  }
-
-  /**
-   * Helper method that determines which stars to print, including randomisation of equidistant
-   * stars, and prints the star IDs
-   * @param k the number of star IDs to be printed
-   */
-  private void kStars(int k) {
-    if (stars.size() < k) { // if we want fewer stars than we have, print them all
-      stars.forEach(s -> System.out.println(s.get(0)));
-    } else if (k > 0) {
-      ArrayList<String> star = stars.get(k - 1);
-      ArrayList<String> kStars = new ArrayList<>();
-      ArrayList<String> equalStars = new ArrayList<>();
-      stars.forEach(s -> {
-        if (Double.parseDouble(s.get(5)) < Double.parseDouble(star.get(5))) {
-          kStars.add(s.get(0));
-        } else if (s.get(5).equals(star.get(5))) {
-          equalStars.add(s.get(0));
-        }
-      });
-
-      int requiredNumber = k - kStars.size();
-
-      Random rand = new Random();
-      for (int i = 0; i < requiredNumber; i++) {
-        int randInt = rand.nextInt(equalStars.size());
-        kStars.add(equalStars.remove(randInt)); // adds randomly selected star to k stars
-      }
-      kStars.forEach(System.out::println);
+      String[] dimensions = new String[] {"weight", "height", "age"};
+      kdTree = new KDTree(data, dimensions);
+      System.out.println("Loaded " + data.length + " users from " + arguments[1]);
+    } catch (IOException e) {
+      System.out.println("ERROR: Unable to read from file " + arguments[1]);
+    } catch (InvalidPathException e) {
+      System.out.println("ERROR: Invalid path " + arguments[1]);
     }
   }
 

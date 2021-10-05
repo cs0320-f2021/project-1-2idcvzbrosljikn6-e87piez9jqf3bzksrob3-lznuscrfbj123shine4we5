@@ -1,0 +1,17 @@
+INPUT
+users data/project-1/runwaySMALL.json
+similar 5 420272
+similar 5 137 68 28
+OUTPUT
+Loaded 30 users from data/project-1/runwaySMALL.json
+391778
+533900
+829124
+185966
+909926
+391778
+533900
+829124
+185966
+909926
+END
