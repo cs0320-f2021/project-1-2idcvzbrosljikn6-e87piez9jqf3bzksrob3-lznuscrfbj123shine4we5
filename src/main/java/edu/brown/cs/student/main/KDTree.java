@@ -3,21 +3,17 @@ package edu.brown.cs.student.main;
 import edu.brown.cs.student.runway.Runway;
 import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 
 public class KDTree {
   private final ArrayList<Hashtable<Integer,KDNode>> sortedTables;
   private final String[] axes;
-  private final PriorityQueue<KDNode> nodeQueue;
+  private final LinkedList<KDNode> nodeQueue;
   private final KDNode root;
 
   public KDTree(Runway[] dataArr, String[] dimensions) {
-    nodeQueue = new PriorityQueue<>();
+    nodeQueue = new LinkedList<>();
     axes = dimensions;
     sortedTables = new ArrayList<>();
 
@@ -365,7 +361,5 @@ public class KDTree {
     public boolean isSuitable(KDNode n){
       return !(n.isVisited() || !inRange(n));
     }
-
-
   }
 }
