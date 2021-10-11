@@ -1,119 +1,121 @@
 package edu.brown.cs.student.main;
 
 import edu.brown.cs.student.runway.Runway;
+import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class KDTree {
-  private final Node root;
-  private final ArrayList<Runway[]> sortedLists;
+  private final ArrayList<Hashtable<Integer,KDNode>> sortedTables;
   private final String[] axes;
-  private final ArrayList<Integer> visited;
+  private final LinkedList<KDNode> nodeQueue;
+  private final KDNode root;
 
   public KDTree(Runway[] dataArr, String[] dimensions) {
-    visited = new ArrayList<Integer>();
-    root = new Node();
-    sortedLists = new ArrayList<>();
+    nodeQueue = new LinkedList<>();
+    axes = dimensions;
+    sortedTables = new ArrayList<>();
 
-    //created versions of the data sorted by each axis
-    for (String dimension : dimensions) {
-      Arrays.sort(dataArr, (o1, o2) -> {
+    //Create all nodes at the start and put them in a list.
+    ArrayList<KDNode> nodeList = buildNodes(dataArr);
+
+    //created hashtables of the data sorted by each axis
+    int a = 0; //axis marker
+    for (String axis : axes) {
+      nodeList.sort((o1, o2) -> {
         try {
-          return (int) (getNumVal((Runway) o1, dimension) - getNumVal((Runway) o2, dimension));
+          return (int) (getNumVal((Runway) o1.data, axis) - getNumVal((Runway) o2.data, axis));
         } catch (Exception e) {
           e.printStackTrace();
           return 0;
         }
       });
-      sortedLists.add(dataArr);
+      Hashtable<Integer, KDNode> table = new Hashtable<>();
+      for(int i = 0; i < nodeList.size(); i++){
+        KDNode n = nodeList.get(i);
+        table.put(i, n);
+        n.setIndex(a,i);
+        n.setRange(a,0,nodeList.size()-1);
+      }
+      //increment axis
+      a++;
+      sortedTables.add(table);
     }
 
-    axes = dimensions;
+
     int median = 0;
     if (dataArr.length % 2 == 0) {
       median = dataArr.length / 2;
     } else {
       median = (dataArr.length - 1) / 2;
     }
-    root.data = sortedLists.get(0)[median];
-    visited.add(root.data.getUserId());
-    setupTree(0, root);
+    root = sortedTables.get(0).get(median);
+    root.visited = true;
+    nodeQueue.add(root);
+    root.axis = 0;
+
+    while(!nodeQueue.isEmpty()){
+      setupChildren(nodeQueue.remove());
+    }
   }
 
-  public void setupTree(int axis, Node n) {
+  public ArrayList<KDNode> buildNodes(Runway[] data){
+    ArrayList<KDNode> nodes = new ArrayList<>();
+    for(Runway r: data){
+      KDNode node = new KDNode();
+      node.data = r;
+      nodes.add(node);
+    }
+    return nodes;
+  }
+
+  public void setupChildren(KDNode curr){
+    curr.right = findChild(curr, true);
+    curr.left = findChild(curr, false);
+  }
+
+  public KDNode findChild(KDNode curr, boolean right) {
+    Hashtable<Integer, KDNode> table = sortedTables.get(curr.getAxis());
+    int dir = (right) ? 1 : -1;
+    int i = curr.getIndex(curr.getAxis());
+
     /*
-     * create left/right children
-     * left.data = next smallest neighbor on dimension
-     * right.data = next largest neighbor on dimension
+    Traverse the relevant-axis sortedTable in the appropriate direction until
+    reaching EITHER the range limit of curr OR a suitable child.
+
+    A suitable child is both unvisited and located within all of curr's axial ranges.
      */
+    while (curr.inRange(curr.axis, i+dir) && !curr.isSuitable(table.get(i))) {
+      i += dir;
+    }
+    if(curr.isSuitable(table.get(i))){
+      KDNode child = table.get(i);
+      //mark node as visited
+      child.visit();
 
-    List<Runway> tempList = Arrays.asList(sortedLists.get(axis));
+      //set child's range in relevant axis to be half of original range
+      child.setRange(curr.getAxis(),
+          (right)? curr.getIndex(curr.getAxis()) : curr.getMin(curr.getAxis()),
+          (right)? curr.getMax(curr.getAxis()) : curr.getIndex(curr.getAxis()));
 
-    if (needsChild(sortedLists.get(axis), tempList.indexOf(n.data), true)) {
-      Node r = new Node();
-      r.data = tempList.get(tempList.indexOf(n.data) + 1);
-      //if assigned user is visited, keep looking to the right until it is not
-      while (visited.contains(r.data.getUserId())) {
-        r.data = tempList.get(tempList.indexOf(r.data) + 1);
-      }
-      n.right = r;
-      visited.add(n.right.data.getUserId());
-      if (visited.size() < tempList.size()) {
-        int x = 1;
-        if (axis + x == axes.length) {
-          x = -axis;
+      //for all other axes, child inherits the parent's range
+      for(int axis = 0; axis < axes.length; axis++){
+        if(axis != curr.getAxis()){
+          child.setRange(axis, curr.getMin(axis), curr.getMax(axis));
         }
-        setupTree(axis + x, n.right);
       }
+
+      //child's relevant axis set to next in the cycle
+      child.setAxis((curr.getAxis() < axes.length -1) ? curr.getAxis()+1 : 0);
+
+      //add child to queue
+      nodeQueue.add(child);
+
+      return child;
     }
 
-    if (needsChild(sortedLists.get(axis), tempList.indexOf(n.data), false)) {
-      Node l = new Node();
-      l.data = tempList.get(tempList.indexOf(n.data) - 1);
-      while (visited.contains(l.data.getUserId())) {
-        l.data = tempList.get(tempList.indexOf(l.data) - 1);
-      }
-      n.left = l;
-      visited.add(n.left.data.getUserId());
-
-
-      if (visited.size() < tempList.size()) {
-        int x = 1;
-        if (axis + x == axes.length) {
-          x = -axis;
-        }
-        setupTree(axis + x, n.left);
-      }
-    }
-
-  }
-
-  public boolean needsChild(Runway[] array, int i, boolean right) {
-    int dir;
-    if (right) {
-      dir = 1;
-    } else {
-      dir = -1;
-    }
-
-    while (true) {
-      //if index is at the min/max, return false. No child needed.
-      if (i + dir == array.length || i + dir == -1) {
-        return false;
-      }
-      /*
-      If the next user in line is visited, increase i and loop again.
-      Otherwise return true - suitable child exists
-       */
-      if (visited.contains(array[i + dir].getUserId())) {
-        i += dir;
-      } else {
-        return true;
-      }
-    }
+    return null;
   }
 
   /*
@@ -151,7 +153,7 @@ public class KDTree {
   Also requires an axis number and an array of values for the furthest neighbor,
   explained in the comments for knn().
    */
-  private Runway[] knnHelper(int k, int[] target, Node curr,
+  private Runway[] knnHelper(int k, int[] target, KDNode curr,
                              List<Runway> neighbors, int[] furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
     int eDist = euclideanDistance(target[0], target[1], target[2], curr.data);
@@ -284,9 +286,80 @@ public class KDTree {
         + Math.pow(y - r.getHeight(), 2) + Math.pow(z - r.getAge(), 2)));
   }
 
-  private static class Node {
+  private class KDNode {
     private Runway data;
-    private Node left;
-    private Node right;
+    private KDNode left;
+    private KDNode right;
+    // know your indices in each of the 3 sortedTables. indices match up to axes
+    private ArrayList<ArrayList<Integer>> indicesAndRanges = new ArrayList<>();
+    private boolean visited;
+    private int axis;
+
+
+    public void setAxis(int a){
+      axis = a;
+    }
+
+    public int getAxis(){
+      return axis;
+    }
+
+    public void setIndex(int axis, int index){
+      try{
+        indicesAndRanges.get(axis).add(0,index);
+      }catch(IndexOutOfBoundsException e){
+        while(indicesAndRanges.size() <= axis){
+          indicesAndRanges.add(new ArrayList<>());
+        }
+        indicesAndRanges.get(axis).add(0,index);
+      }
+    }
+    public void setRange(int axis, int min, int max){
+      try{
+        indicesAndRanges.get(axis).set(1, min);
+      } catch(IndexOutOfBoundsException e){
+        indicesAndRanges.get(axis).add(1,min);
+      }
+      try{
+        indicesAndRanges.get(axis).set(2, max);
+      } catch(IndexOutOfBoundsException e){
+        indicesAndRanges.get(axis).add(2,max);
+      }
+    }
+
+    public int getIndex(int axis){
+      return indicesAndRanges.get(axis).get(0);
+    }
+    public int getMin(int axis){
+      return indicesAndRanges.get(axis).get(1);
+    }
+    public int getMax(int axis){
+      return indicesAndRanges.get(axis).get(2);
+    }
+
+    public boolean isVisited(){
+      return visited;
+    }
+
+    public void visit(){
+      visited = true;
+    }
+
+    public boolean inRange(int axis, int index){
+      return (index >= getMin(axis) && index <= getMax(axis));
+    }
+
+    public boolean inRange(KDNode node){
+      for(int i = 0; i < axes.length; i++){
+        if(!inRange(i, node.getIndex(i))){
+          return false;
+        }
+      }
+      return true;
+    }
+
+    public boolean isSuitable(KDNode n){
+      return !(n.isVisited() || !inRange(n));
+    }
   }
 }
