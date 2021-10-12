@@ -36,10 +36,20 @@ public class ApiClient {
 
   // TODO
   public void recommenderUsers() {
-    String reqUri = "https://runwayapi.herokuapp.com/integration" + apiAuth;
-    String userData = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
-        .POST(HttpRequest.BodyPublishers.ofString("{\"auth\":" + apiAuth)).build());
-    System.out.println(userData);
+    String reqUri = "https://runwayapi.herokuapp.com/integration";
+    HttpResponse<String> userData = null;
+    try {
+      userData = client.send(HttpRequest.newBuilder(URI.create(reqUri))
+          .POST(HttpRequest.BodyPublishers.ofString(ClientAuth.getJsonUserAuth())).header("x-api" +
+                      "-key", ClientAuth.getApiKey()).build(),
+          HttpResponse.BodyHandlers.ofString());
+
+      System.out.println(userData.body());
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   /**

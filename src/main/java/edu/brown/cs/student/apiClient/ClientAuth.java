@@ -21,4 +21,22 @@ public final class ClientAuth {
     FileParser parser = new FileParser("config/secret/loginAndKey.txt");
     return parser.readNewLine();
   }
+
+  /**
+   * Reads the JSON user auth code from the secret text file where we have stored it.
+   * @return a String of the JSON of the user auth code in the format {"auth":"<cslogin>"}
+   */
+  public static String getJsonUserAuth() {
+    FileParser parser = new FileParser("config/secret/jsonAuth.txt");
+    return parser.readNewLine();
+  }
+
+  /**
+   * Reads the API key from the secret text file where we have stored it.
+   * @return a String of the API key
+   */
+  public static String getApiKey() {
+    FileParser parser = new FileParser("config/secret/apiKey.txt");
+    return parser.readNewLine();
+  }
 }

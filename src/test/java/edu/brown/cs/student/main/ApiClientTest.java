@@ -65,4 +65,9 @@ public class ApiClientTest {
     ApiClient ac = new ApiClient();
     ac.recommenderUsers();
   }
+
+  public static void main(String[] args) {
+    ApiClient ac = new ApiClient();
+    ac.recommenderUsers();
+  }
 }
