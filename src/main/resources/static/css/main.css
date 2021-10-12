@@ -1,3 +1,39 @@
 input[type="number"] {
   width: 3em;
 }
+
+body {
+  font-family: verdana, serif;
+  color: white;
+  background-image: url("https://wallpaperaccess.com/download/hd-stars-17509");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-size: 25px;
+}
+h1 {
+  font-family: verdana, serif;
+  color: white;
+}
+p {
+  font-family: verdana, serif;
+  color: white;
+}
+
+table, th, td {
+  border: 4px solid white;
+  border-collapse: collapse;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  text-align: center;
+}
+
+.stars {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  text-align: center;
+}

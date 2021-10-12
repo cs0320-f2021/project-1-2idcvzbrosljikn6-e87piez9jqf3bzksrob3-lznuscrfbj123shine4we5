@@ -1,0 +1,13 @@
+INPUT
+stars data/stars/stars-at-same-point.csv
+neighbors 1 -43 43 -43
+neighbors 2 -43 43 -43
+radius 0 -43 43 -43
+OUTPUT
+Read 10 stars from data/stars/stars-at-same-point.csv
+71457
+71454
+71457
+71454
+71457
+END

@@ -1,0 +1,15 @@
+INPUT
+stars data/stars/three-star.csv
+neighbors 3 0 0 0
+stars data/stars/three-more-stars.csv
+neighbors 3 0 0 0
+OUTPUT
+Read 3 stars from data/stars/three-star.csv
+1
+2
+3
+Read 3 stars from data/stars/three-more-stars.csv
+456
+567
+678
+END
