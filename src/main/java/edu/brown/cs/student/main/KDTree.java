@@ -154,7 +154,7 @@ public class KDTree {
   explained in the comments for knn().
    */
   private Runway[] knnHelper(int k, int[] target, KDNode curr,
-                             List<Runway> neighbors, int[] furthest, int axis) {
+                             ArrayList<Runway> neighbors, int[] furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
     int eDist = euclideanDistance(target[0], target[1], target[2], curr.data);
 
@@ -211,7 +211,7 @@ public class KDTree {
         }
         Runway[] result = knnHelper(k, target, curr.left, neighbors, furthest, axis);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.right, Arrays.asList(result), furthest, axis);
+          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, axis);
         } else {
           return result;
         }
@@ -363,3 +363,4 @@ public class KDTree {
     }
   }
 }
+
