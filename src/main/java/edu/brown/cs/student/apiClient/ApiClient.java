@@ -3,6 +3,7 @@ package edu.brown.cs.student.apiClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import edu.brown.cs.student.main.DataStore;
+import edu.brown.cs.student.recommender.Response;
 import edu.brown.cs.student.runway.Rent;
 import edu.brown.cs.student.runway.Review;
 import edu.brown.cs.student.runway.Runway;
@@ -35,7 +36,7 @@ public class ApiClient {
   }
 
   // TODO
-  public void recommenderUsers() {
+  public Response[] recommenderUsers() {
     String reqUri = "https://runwayapi.herokuapp.com/integration";
     HttpResponse<String> userData = null;
     try {
@@ -44,12 +45,14 @@ public class ApiClient {
                       "-key", ClientAuth.getApiKey()).build(),
           HttpResponse.BodyHandlers.ofString());
 
-      System.out.println(userData.body());
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+//      System.out.println(userData.body());
+
+      return new Gson().fromJson(userData.body(), Response[].class);
+    } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }
+
+    return null;
   }
 
   /**

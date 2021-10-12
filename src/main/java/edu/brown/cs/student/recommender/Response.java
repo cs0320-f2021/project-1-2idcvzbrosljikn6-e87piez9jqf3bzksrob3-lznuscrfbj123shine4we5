@@ -38,4 +38,40 @@ public class Response implements Item {
   public String getId() {
     return id;
   }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getMeeting() {
+    return meeting;
+  }
+
+  public String getGrade() {
+    return grade;
+  }
+
+  public int getExperience() {
+    return Integer.parseInt(experience);
+  }
+
+  public String getHoroscope() {
+    return horoscope;
+  }
+
+  public String[] getMeetingTimes() {
+    return meetingTimes.split("; ");
+  }
+
+  public String getPreferredLanguage() {
+    return preferredLanguage;
+  }
+
+  public String getMarginalizedGroups() {
+    return marginalizedGroups;
+  }
+
+  public boolean getPreferGroup() {
+    return preferGroup.equals("Yes");
+  }
 }
