@@ -11,6 +11,7 @@ public class KDTree {
   private final String[] axes;
   private final LinkedList<KDNode> nodeQueue;
   private final KDNode root;
+  private final ArrayList<KDNode> nodeList;
 
   public KDTree(Runway[] dataArr, String[] dimensions) {
     nodeQueue = new LinkedList<>();
@@ -18,7 +19,7 @@ public class KDTree {
     sortedTables = new ArrayList<>();
 
     //Create all nodes at the start and put them in a list.
-    ArrayList<KDNode> nodeList = buildNodes(dataArr);
+    nodeList = buildNodes(dataArr);
 
     //created hashtables of the data sorted by each axis
     int a = 0; //axis marker
@@ -74,6 +75,12 @@ public class KDTree {
     curr.right = findChild(curr, true);
     curr.left = findChild(curr, false);
   }
+
+
+  public KDNode getRoot(){
+    return root;
+  }
+
 
   public KDNode findChild(KDNode curr, boolean right) {
     Hashtable<Integer, KDNode> table = sortedTables.get(curr.getAxis());
@@ -142,9 +149,8 @@ public class KDTree {
     neighbor from target. Note: furthest[0] is the index within
     neighbors, furthest[1] is the distance from target point.
      */
-    int[] furthest = new int[2];
 
-    return knnHelper(k, new int[] {weight, height, age}, root, neighbors, furthest, 0);
+    return knnHelper(k, new int[] {weight, height, age}, root, neighbors, 0, 0);
   }
 
   /*
@@ -154,7 +160,7 @@ public class KDTree {
   explained in the comments for knn().
    */
   private Runway[] knnHelper(int k, int[] target, KDNode curr,
-                             ArrayList<Runway> neighbors, int[] furthest, int axis) {
+                             ArrayList<Runway> neighbors, int furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
     int eDist = euclideanDistance(target[0], target[1], target[2], curr.data);
 
@@ -163,20 +169,22 @@ public class KDTree {
     one of your k-nearest neighbors, or if your collection
     of neighbors is not full, update the list accordingly
      */
-    if (eDist < furthest[1] || neighbors.size() < k) {
+    if (eDist < furthest || neighbors.size() < k) {
       neighbors.add(curr.data);
+      neighbors.sort(
+          Comparator.comparingInt(o -> euclideanDistance(target[0], target[1], target[2], o)));
       if (neighbors.size() > k) {
         //if there are now more than k neighbors saved, remove the furthest neighbor.
-        neighbors.remove(furthest[0]);
-        furthest = findFurthest(target, neighbors);
-      } else if (eDist > furthest[1]) {
-        furthest[1] = eDist;
-        furthest[0] = neighbors.size() - 1;
+        neighbors.remove(neighbors.size()-1);
       }
+      furthest = euclideanDistance(target[0], target[1], target[2],
+          neighbors.get(neighbors.size()-1));
     }
 
     //If there are no children on which to recur, return current list of neighbors as array.
     if (curr.right == null && curr.left == null) {
+      neighbors.sort(
+          Comparator.comparingInt(o -> euclideanDistance(target[0], target[1], target[2], o)));
       return neighbors.toArray(new Runway[0]);
     }
 
@@ -202,26 +210,16 @@ public class KDTree {
         System.out.println("ERROR");
         break;
     }
-    if (furthest[1] > Math.abs(axisDist) || neighbors.size() < k) {
+    if (furthest > Math.abs(axisDist) || neighbors.size() < k) {
       if (curr.left != null) {
-        if (axis == axes.length - 1) {
-          axis = 0;
-        } else {
-          axis += 1;
-        }
-        Runway[] result = knnHelper(k, target, curr.left, neighbors, furthest, axis);
+        Runway[] result = knnHelper(k, target, curr.left, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, axis);
+          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, (axis == axes.length - 1) ? 0 : axis+1);
         } else {
           return result;
         }
       } else {
-        if (axis == axes.length - 1) {
-          axis = 0;
-        } else {
-          axis += 1;
-        }
-        return knnHelper(k, target, curr.right, neighbors, furthest, axis);
+        return knnHelper(k, target, curr.right, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
       }
     }
 
@@ -244,19 +242,9 @@ public class KDTree {
     dimensions.
      */
     if (axisDist < 0 && curr.left != null) {
-      if (axis == axes.length - 1) {
-        axis = 0;
-      } else {
-        axis += 1;
-      }
-      return knnHelper(k, target, curr.left, neighbors, furthest, axis);
+      return knnHelper(k, target, curr.left, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
     } else if (axisDist > 0 && curr.right != null) {
-      if (axis == axes.length - 1) {
-        axis = 0;
-      } else {
-        axis += 1;
-      }
-      return knnHelper(k, target, curr.right, neighbors, furthest, axis);
+      return knnHelper(k, target, curr.right, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
     }
     return neighbors.toArray(new Runway[0]);
   }
@@ -285,8 +273,17 @@ public class KDTree {
     return (int) Math.abs(Math.sqrt(Math.pow(x - r.getWeight(), 2)
         + Math.pow(y - r.getHeight(), 2) + Math.pow(z - r.getAge(), 2)));
   }
+  //public version for testing
+  public int euclideanDistance(Runway r1, Runway r2) {
+    return (int) Math.abs(Math.sqrt(Math.pow(r1.getWeight() - r2.getWeight(), 2)
+        + Math.pow(r1.getHeight() - r2.getHeight(), 2) + Math.pow(r1.getAge() - r2.getAge(), 2)));
+  }
 
-  private class KDNode {
+  public ArrayList<KDNode> getNodes() {
+    return nodeList;
+  }
+
+  public class KDNode {
     private Runway data;
     private KDNode left;
     private KDNode right;
@@ -304,6 +301,17 @@ public class KDTree {
       return axis;
     }
 
+    public KDNode getRight(){
+      return right;
+    }
+
+    public KDNode getLeft(){
+      return left;
+    }
+
+    public Runway getData(){
+      return data;
+    }
     public void setIndex(int axis, int index){
       try{
         indicesAndRanges.get(axis).add(0,index);
@@ -363,4 +371,3 @@ public class KDTree {
     }
   }
 }
-
