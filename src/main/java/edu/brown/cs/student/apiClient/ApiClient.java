@@ -34,6 +34,14 @@ public class ApiClient {
         .build();
   }
 
+  // TODO
+  public void recommenderUsers() {
+    String reqUri = "https://runwayapi.herokuapp.com/integration" + apiAuth;
+    String userData = this.makeRequest(HttpRequest.newBuilder(URI.create(reqUri))
+        .POST(HttpRequest.BodyPublishers.ofString("{\"auth\":" + apiAuth)).build());
+    System.out.println(userData);
+  }
+
   /**
    * Method called when the user requests user data from the endpoints.
    * Stores retrieved data in the DataStore

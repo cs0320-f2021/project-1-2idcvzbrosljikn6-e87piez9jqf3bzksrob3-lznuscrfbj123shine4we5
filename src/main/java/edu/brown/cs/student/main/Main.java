@@ -118,10 +118,13 @@ public final class Main {
             case "classify":
               classifyReplHelper(arguments);
               break;
+            case "recsys_load":
+              loadHelper(arguments);
             default:
               System.out.println("ERROR: invalid command.");
               System.out.println("Valid commands: get_users, get_rents, "
                   + "get_reviews, users, similar, classify");
+
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
@@ -132,6 +135,18 @@ public final class Main {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
     }
+  }
+
+  private void loadHelper(String[] arguments) {
+    /*
+    if second argument is "responses" continue else print "inavalid argument"
+
+    aData = data from Api
+    bData =  data from Database
+
+    Create a Recommender object with the aData and bData as inputs
+    Types for these?
+     */
   }
 
   /**

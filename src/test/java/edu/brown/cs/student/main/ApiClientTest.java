@@ -59,4 +59,10 @@ public class ApiClientTest {
     assertEquals(ApiClient.normaliseJson(json), jsonCorrect);
     assertEquals(ApiClient.normaliseJson(jsonCorrect), jsonCorrect);
   }
+
+  @Test
+  public void testRecommender() {
+    ApiClient ac = new ApiClient();
+    ac.recommenderUsers();
+  }
 }
