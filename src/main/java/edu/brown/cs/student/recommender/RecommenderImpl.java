@@ -18,6 +18,11 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
 
     public RecommenderImpl(RecommenderResponse[] responses){
+      RecommenderResponse r = responses[0];
+      System.out.println(r.getInterests().get(0));
+      System.out.println(r.getAlgorithms());
+      System.out.println(r.getMarginalizedGroups());
+      System.out.println(r.getMeetingTimes());
 
       /*
       traverse apiData and add ID's as keys to dataMap

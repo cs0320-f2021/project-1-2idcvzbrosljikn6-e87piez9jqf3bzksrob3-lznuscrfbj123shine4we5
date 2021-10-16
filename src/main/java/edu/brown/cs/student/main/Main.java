@@ -158,6 +158,7 @@ public final class Main {
     if (arguments.length != 2 || !arguments[1].equals("responses")) {
       System.out.println("ERROR: Invalid argument.");
       System.out.println("Valid usage: recsys_load responses");
+      return;
     }
 
 //    RecommenderResponse[] responses = client.recommenderUsers();

@@ -86,8 +86,8 @@ public class RecommenderResponse implements Item {
     return preferredLanguage;
   }
 
-  public String getMarginalizedGroups() {
-    return marginalizedGroups;
+  public String[] getMarginalizedGroups() {
+    return marginalizedGroups.split("; ");
   }
 
   public boolean getPreferGroup() {
