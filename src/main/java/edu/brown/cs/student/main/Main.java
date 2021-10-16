@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -21,6 +23,11 @@ import com.google.common.collect.ImmutableMap;
 
 import com.google.gson.Gson;
 import edu.brown.cs.student.apiClient.ApiClient;
+import edu.brown.cs.student.orm.Database;
+import edu.brown.cs.student.recommender.Interests;
+import edu.brown.cs.student.recommender.RecommenderImpl;
+import edu.brown.cs.student.recommender.RecommenderResponse;
+import edu.brown.cs.student.recommender.Skills;
 import edu.brown.cs.student.runway.Runway;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -41,6 +48,7 @@ public final class Main {
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
   private KDTree kdTree = null;
+  private RecommenderImpl recommender = null;
 
   /**
    * The initial method called when execution begins.
@@ -146,6 +154,28 @@ public final class Main {
     Create a Recommender object with the aData and bData as inputs
     Types for these?
      */
+
+    if (arguments.length != 2 || !arguments[1].equals("responses")) {
+      System.out.println("ERROR: Invalid argument.");
+      System.out.println("Valid usage: recsys_load responses");
+    }
+
+//    RecommenderResponse[] responses = client.recommenderUsers();
+      RecommenderResponse[] responses = client.localRecommenderUsers();
+    try {
+      Database db = new Database("data/integration.sqlite3");
+      for (RecommenderResponse response: responses) {
+        response.fetchDatabaseData(db);
+      }
+
+      recommender = new RecommenderImpl(responses);
+      System.out.println("Loaded Recommender with " + responses.length + " students");
+
+    } catch (ClassNotFoundException e) {
+      System.out.println("ERROR: Database not found");
+    } catch (SQLException e) {
+      System.out.println("ERROR: Illegal SQL input");
+    }
   }
 
   /**

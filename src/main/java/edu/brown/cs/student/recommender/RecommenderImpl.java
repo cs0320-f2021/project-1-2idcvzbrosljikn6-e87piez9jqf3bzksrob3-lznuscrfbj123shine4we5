@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-public class RecommenderImpl implements Recommender<Response> {
+public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
-  private HashMap<String,Response> dataMap;
+  private HashMap<String, RecommenderResponse> dataMap;
 
 
-    public RecommenderImpl(Collection<Response> apiData, Collection<Response> sqlData){
+    public RecommenderImpl(RecommenderResponse[] responses){
 
       /*
       traverse apiData and add ID's as keys to dataMap
@@ -28,7 +28,7 @@ public class RecommenderImpl implements Recommender<Response> {
 
 
   @Override
-  public List<Response> getTopKRecommendations(Response item, int k) {
+  public List<RecommenderResponse> getTopKRecommendations(RecommenderResponse item, int k) {
     return null;
   }
 }

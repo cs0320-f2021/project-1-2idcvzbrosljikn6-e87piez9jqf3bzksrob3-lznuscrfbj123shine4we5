@@ -242,6 +242,4 @@ public class Database {
     System.out.println(output.size());
     return output;
   }
-
-
 }
