@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,8 @@ public final class Main {
       runSparkServer((int) options.valueOf("port"));
     }
 
+    HashMap<String, Command> commands = this.createHashMap();
+
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
       String input;
       while ((input = br.readLine()) != null) {
@@ -98,33 +101,12 @@ public final class Main {
           if (arguments.length == 0) {
             continue;
           }
-          switch (arguments[0]) {
-            case "get_users":
-              client.usersApiCall(false);
-              break;
-            case "get_rents":
-              client.rentsApiCall();
-              break;
-            case "get_reviews":
-              client.reviewsApiCall();
-              break;
-            case "users":
-              usersHelper(arguments);
-              break;
-            case "similar":
-              //if no tree has been loaded yet
-              similarHelper(arguments);
-              break;
-            case "classify":
-              classifyReplHelper(arguments);
-              break;
-            case "recsys_load":
-              loadHelper(arguments);
-            default:
-              System.out.println("ERROR: invalid command.");
-              System.out.println("Valid commands: get_users, get_rents, "
-                  + "get_reviews, users, similar, classify");
-
+          if (commands.containsKey(arguments[0])) {
+            commands.get(arguments[0]).run(arguments);
+          } else {
+            System.out.println("ERROR: invalid command.");
+            System.out.println("Valid commands: get_users, get_rents, "
+                + "get_reviews, users, similar, classify");
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
@@ -135,6 +117,23 @@ public final class Main {
       e.printStackTrace();
       System.out.println("ERROR: Invalid input for REPL");
     }
+  }
+
+  /**
+   * Helper method that returns a HashMap of the command keywords with their relevant method to
+   * run (the relevant Command).
+   * @return a HashMap of command strings to Commands
+   */
+  private HashMap<String, Command> createHashMap() {
+    HashMap<String, Command> commands = new HashMap<>();
+    commands.put("get_users", (String[] args) -> client.usersApiCall(false));
+    commands.put("get_rents", (String[] args) -> client.rentsApiCall());
+    commands.put("get_reviews", (String[] args) -> client.reviewsApiCall());
+    commands.put("users", this::usersHelper);
+    commands.put("similar", this::similarHelper);
+    commands.put("classify", this::classifyReplHelper);
+    commands.put("recsys_load", this::loadHelper);
+    return commands;
   }
 
   private void loadHelper(String[] arguments) {
