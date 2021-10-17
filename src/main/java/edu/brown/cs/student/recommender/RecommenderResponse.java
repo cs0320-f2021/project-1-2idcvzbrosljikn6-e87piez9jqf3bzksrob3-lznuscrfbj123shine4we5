@@ -94,6 +94,10 @@ public class RecommenderResponse implements Item {
     return preferGroup.equals("Yes");
   }
 
+  /**
+   * Helper method that fetches data from the database for this id and loads it into the instance.
+   * @param db the instance of the Database class used to fetch data fromg
+   */
   public void fetchDatabaseData(Database db) {
     Map<String, String> queryParams = new HashMap<>();
     queryParams.put("id", id);

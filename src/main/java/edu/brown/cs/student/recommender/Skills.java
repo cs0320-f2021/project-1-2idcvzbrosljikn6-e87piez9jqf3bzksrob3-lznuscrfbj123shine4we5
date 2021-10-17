@@ -12,6 +12,10 @@ public class Skills {
   private int teamwork;
   private int frontend;
 
+  /**
+   * Class representing a row of the skills table in integration.sqlite3
+   * @param map of all skills to gvalue, from the table
+   */
   public Skills(Map<String, String> map) {
     id = Integer.parseInt(map.get("id"));
     name = map.get("name");
