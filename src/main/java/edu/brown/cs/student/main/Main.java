@@ -170,7 +170,6 @@ public final class Main {
       }
 
       recommender = new RecommenderImpl(responses);
-      System.out.println("Loaded Recommender with " + responses.length + " students");
 
     } catch (ClassNotFoundException e) {
       System.out.println("ERROR: Database not found");
