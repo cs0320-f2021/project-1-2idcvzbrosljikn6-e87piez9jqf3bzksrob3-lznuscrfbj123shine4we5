@@ -63,8 +63,8 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
     return result.subList(0, k-1);
   }
 
-  public List<Set<RecommenderResponse>> generateGroups(int k){
-      //Generate a compatiblity list for all users without an existing one.
+  public List<HashSet<RecommenderResponse>> generateGroups(int k){
+      //Generate a compatibility list for all users without an existing one.
       for(RecommenderResponse r: dataMap.values()){
         if(r.hasCompatibilityList()){
           continue;
@@ -88,20 +88,23 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       will fall at the top. This is why we start at the end of the list and move
       up.
        */
+      List<HashSet<RecommenderResponse>> groups = new ArrayList<>();
 
       for(int i = dataMap.size()-1; i >= 0; i--){
           //find the top K recommendations, which should just be the first K people in their compatibility list.
           HashSet<RecommenderResponse> group = new HashSet();
           int j = 0;
-          while(group.size() < k) {
+          while(group.size() < k && j < dataMap.size()) {
               RecommenderResponse groupMate = ACList.get(i).getCompatibilityList().get(j);
-          if(groupMate
+              if(!groupMate.inGroup){
+                  group.add(groupMate);
+                  groupMate.inGroup = true;
+              }
+              j++;
           }
+          groups.add(group);
       }
-
-
-
-      return null;
+      return groups;
   }
 
   private int avgCompatibilityScore(RecommenderResponse response){

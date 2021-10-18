@@ -10,11 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,7 +134,20 @@ public final class Main {
     commands.put("classify", this::classifyReplHelper);
     commands.put("recsys_load", this::loadHelper);
     commands.put("recsys_rec", this::recHelper);
+    commands.put("recsys_gen_groups", this::makeTeamHelper);
     return commands;
+  }
+
+  private void makeTeamHelper(String[] arguments){
+    for(HashSet<RecommenderResponse> group : recommender.generateGroups(Integer.parseInt(arguments[1]))){
+      System.out.print("[");
+      int counter = 0;
+      for(RecommenderResponse r : group){
+        System.out.print((counter != group.size()-1) ? r.getId() + ", " : r.getId());
+        counter++;
+      }
+      System.out.println("]");
+    }
   }
 
   private void recHelper(String[] arguments){
@@ -216,7 +225,7 @@ public final class Main {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
             RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                    user.getWeight(), user.getHeight(), user.getAge());
+                   new int[]{user.getWeight(), user.getHeight(), user.getAge()});
             classifyHelper(classify);
             userExists = true;
             break; // if we've found the user, break out of the loop
@@ -232,9 +241,9 @@ public final class Main {
     } else if (arguments.length == 5) {
       try {
         RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
-                Integer.parseInt(arguments[2]),
+                new int[]{Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
-                Integer.parseInt(arguments[4]));
+                Integer.parseInt(arguments[4])});
         classifyHelper(classify);
       } catch (NumberFormatException e) {
         System.out.println("ERROR: Argument not integer.");
@@ -257,13 +266,13 @@ public final class Main {
     // if userID input
     if (arguments.length == 3) {
       boolean userExists = false;
-      for (RecommenderResponse user : DataStore.getRunways()) {
+      for (Runway user : DataStore.getRunways()) {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
             RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
-                    user.getWeight(), user.getHeight(), user.getAge());
+                   new int[]{ user.getWeight(), user.getHeight(), user.getAge()});
             for (RecommenderResponse neighbor : similar) {
-              System.out.println(neighbor.getUserId());
+              System.out.println(neighbor.getId());
             }
             userExists = true;
             break;
@@ -279,11 +288,11 @@ public final class Main {
     } else if (arguments.length == 5) { //if coordinate input
       try {
         RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
-                Integer.parseInt(arguments[2]),
+                new int[]{Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
-                Integer.parseInt(arguments[4]));
+                Integer.parseInt(arguments[4])});
         for (RecommenderResponse neighbor : similar) {
-          System.out.println(neighbor.getUserId());
+          System.out.println(neighbor.getId());
         }
       } catch (NumberFormatException e) {
         System.out.println("ERROR: Argument not integer.");
@@ -332,17 +341,18 @@ public final class Main {
     }
 
     try {
-      RecommenderResponse[] data;
+      Runway[] data;
       if (!usersLoaded) { // if data hasn't already been loaded through the API
         String json = ApiClient.normaliseJson(Files.readString(Path.of(arguments[1])).strip());
-        data = new Gson().fromJson(json, RecommenderResponse[].class);
+        data = new Gson().fromJson(json, Runway[].class);
         DataStore.setRunways(data);
       } else {
         data = DataStore.getRunways();
       }
 
       String[] dimensions = new String[] {"weight", "height", "age"};
-      kdTree = new KDTree(data, dimensions);
+      //TODO: Fix this by making an interface for Runway/RecommenderResponse/etc.
+      //kdTree = new KDTree(data, dimensions);
       System.out.println("Loaded " + data.length + " users from " + arguments[1]);
     } catch (IOException e) {
       System.out.println("ERROR: Unable to read from file " + arguments[1]);
