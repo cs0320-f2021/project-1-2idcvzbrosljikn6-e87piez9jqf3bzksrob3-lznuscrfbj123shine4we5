@@ -10,12 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class RecommenderResponse implements Item {
 
   private String id;
   private String name;
   private String meeting;
   private String grade;
+  private List<RecommenderResponse> compatibilityList;
+  public boolean inGroup = false;
 
   @SerializedName("years_of_experience")
   private String experience;
@@ -46,16 +49,38 @@ public class RecommenderResponse implements Item {
   private int algorithms;
   private int teamwork;
   private int frontend;
+  public final int[] skillArr = new int[] {commenting,testing,OOP,algorithms,teamwork,frontend};
 
 
   @Override
   public List<String> getVectorRepresentation() {
+
     return null;
   }
 
   @Override
   public String getId() {
     return id;
+  }
+
+  public int[] getSkills(){
+    return skillArr;
+  }
+
+  public void setCompatibilityList(List<RecommenderResponse> list){
+    compatibilityList = list;
+  }
+
+  public List<RecommenderResponse> getCompatibilityList(){
+    return compatibilityList;
+  }
+
+  public boolean hasCompatibilityList(){
+    return (compatibilityList != null);
+  }
+
+  public int getSkills(int s){
+    return skillArr[s];
   }
 
   public String getName() {
@@ -96,7 +121,7 @@ public class RecommenderResponse implements Item {
 
   /**
    * Helper method that fetches data from the database for this id and loads it into the instance.
-   * @param db the instance of the Database class used to fetch data fromg
+   * @param db the instance of the Database class used to fetch data from
    */
   public void fetchDatabaseData(Database db) {
     Map<String, String> queryParams = new HashMap<>();

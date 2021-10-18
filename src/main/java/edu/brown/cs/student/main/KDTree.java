@@ -1,32 +1,35 @@
 package edu.brown.cs.student.main;
 
-import edu.brown.cs.student.runway.Runway;
-import org.w3c.dom.Node;
+import edu.brown.cs.student.recommender.RecommenderResponse;
 
 import java.util.*;
 
 
 public class KDTree {
   private final ArrayList<Hashtable<Integer,KDNode>> sortedTables;
-  private final String[] axes;
   private final LinkedList<KDNode> nodeQueue;
   private final KDNode root;
+  private final int numAxes;
   private final ArrayList<KDNode> nodeList;
 
-  public KDTree(Runway[] dataArr, String[] dimensions) {
+  public KDTree(RecommenderResponse[] dataArr, int axisNum) {
     nodeQueue = new LinkedList<>();
-    axes = dimensions;
+    numAxes = axisNum;
     sortedTables = new ArrayList<>();
 
     //Create all nodes at the start and put them in a list.
     nodeList = buildNodes(dataArr);
 
-    //created hashtables of the data sorted by each axis
-    int a = 0; //axis marker
-    for (String axis : axes) {
+    //created hashtables of the data sorted by each s
+    //temp solution
+    int[] skillArr = new int[numAxes];
+    for(int i = 0; i < numAxes; i++){
+      skillArr[i] = i;
+    }
+    for(int skill : skillArr) {
       nodeList.sort((o1, o2) -> {
         try {
-          return (int) (getNumVal((Runway) o1.data, axis) - getNumVal((Runway) o2.data, axis));
+          return (int) (o1.data.getSkills(skill) - o2.data.getSkills(skill));
         } catch (Exception e) {
           e.printStackTrace();
           return 0;
@@ -36,11 +39,9 @@ public class KDTree {
       for(int i = 0; i < nodeList.size(); i++){
         KDNode n = nodeList.get(i);
         table.put(i, n);
-        n.setIndex(a,i);
-        n.setRange(a,0,nodeList.size()-1);
+        n.setIndex(skill,i);
+        n.setRange(skill,0,nodeList.size()-1);
       }
-      //increment axis
-      a++;
       sortedTables.add(table);
     }
 
@@ -61,9 +62,9 @@ public class KDTree {
     }
   }
 
-  public ArrayList<KDNode> buildNodes(Runway[] data){
+  public ArrayList<KDNode> buildNodes(RecommenderResponse[] data){
     ArrayList<KDNode> nodes = new ArrayList<>();
-    for(Runway r: data){
+    for(RecommenderResponse r: data){
       KDNode node = new KDNode();
       node.data = r;
       nodes.add(node);
@@ -107,14 +108,14 @@ public class KDTree {
           (right)? curr.getMax(curr.getAxis()) : curr.getIndex(curr.getAxis()));
 
       //for all other axes, child inherits the parent's range
-      for(int axis = 0; axis < axes.length; axis++){
+      for(int axis = 0; axis < numAxes; axis++){
         if(axis != curr.getAxis()){
           child.setRange(axis, curr.getMin(axis), curr.getMax(axis));
         }
       }
 
       //child's relevant axis set to next in the cycle
-      child.setAxis((curr.getAxis() < axes.length -1) ? curr.getAxis()+1 : 0);
+      child.setAxis((curr.getAxis() < numAxes -1) ? curr.getAxis()+1 : 0);
 
       //add child to queue
       nodeQueue.add(child);
@@ -125,24 +126,8 @@ public class KDTree {
     return null;
   }
 
-  /*
-   * This method returns an inputted user's height,weight, or age as a double.
-   */
-  public int getNumVal(Runway user, String axis) throws Exception {
-    switch (axis) {
-      case "weight":
-        return user.getWeight();
-      case "height":
-        return user.getHeight();
-      case "age":
-        return user.getAge();
-      default:
-        throw new Exception("Unexpected axis input.");
-    }
-  }
-
-  public Runway[] knn(int k, int weight, int height, int age) {
-    ArrayList<Runway> neighbors = new ArrayList<>();
+  public RecommenderResponse[] knn(int k, int[] target) {
+    ArrayList<RecommenderResponse> neighbors = new ArrayList<>();
 
     /*
     Array to keep track of the index and distance of the furthest
@@ -150,7 +135,7 @@ public class KDTree {
     neighbors, furthest[1] is the distance from target point.
      */
 
-    return knnHelper(k, new int[] {weight, height, age}, root, neighbors, 0, 0);
+    return knnHelper(k, target, root, neighbors, 0, 0);
   }
 
   /*
@@ -159,10 +144,10 @@ public class KDTree {
   Also requires an axis number and an array of values for the furthest neighbor,
   explained in the comments for knn().
    */
-  private Runway[] knnHelper(int k, int[] target, KDNode curr,
-                             ArrayList<Runway> neighbors, int furthest, int axis) {
+  private RecommenderResponse[] knnHelper(int k, int[] target, KDNode curr,
+                                          ArrayList<RecommenderResponse> neighbors, int furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
-    int eDist = euclideanDistance(target[0], target[1], target[2], curr.data);
+    int eDist = euclideanDistance(target, curr.data);
 
     /*
     If the current node is closer to your target point than
@@ -172,20 +157,20 @@ public class KDTree {
     if (eDist < furthest || neighbors.size() < k) {
       neighbors.add(curr.data);
       neighbors.sort(
-          Comparator.comparingInt(o -> euclideanDistance(target[0], target[1], target[2], o)));
+          Comparator.comparingInt(o -> euclideanDistance(target, o)));
       if (neighbors.size() > k) {
         //if there are now more than k neighbors saved, remove the furthest neighbor.
         neighbors.remove(neighbors.size()-1);
       }
-      furthest = euclideanDistance(target[0], target[1], target[2],
+      furthest = euclideanDistance(target,
           neighbors.get(neighbors.size()-1));
     }
 
     //If there are no children on which to recur, return current list of neighbors as array.
     if (curr.right == null && curr.left == null) {
       neighbors.sort(
-          Comparator.comparingInt(o -> euclideanDistance(target[0], target[1], target[2], o)));
-      return neighbors.toArray(new Runway[0]);
+          Comparator.comparingInt(o -> euclideanDistance(target, o)));
+      return neighbors.toArray(new RecommenderResponse[0]);
     }
 
     /*
@@ -196,30 +181,17 @@ public class KDTree {
     than k neighbors so far.
      */
     int axisDist = 0;
-    switch (axis) {
-      case 0:
-        axisDist = target[axis] - curr.data.getWeight();
-        break;
-      case 1:
-        axisDist = target[axis] - curr.data.getHeight();
-        break;
-      case 2:
-        axisDist = target[axis] - curr.data.getAge();
-        break;
-      default:
-        System.out.println("ERROR");
-        break;
-    }
+    axisDist = target[axis] - curr.data.getSkills(axis);
     if (furthest > Math.abs(axisDist) || neighbors.size() < k) {
       if (curr.left != null) {
-        Runway[] result = knnHelper(k, target, curr.left, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
+        RecommenderResponse[] result = knnHelper(k, target, curr.left, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, (axis == axes.length - 1) ? 0 : axis+1);
+          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, (axis == numAxes - 1) ? 0 : axis+1);
         } else {
           return result;
         }
       } else {
-        return knnHelper(k, target, curr.right, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
+        return knnHelper(k, target, curr.right, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
       }
     }
 
@@ -242,21 +214,21 @@ public class KDTree {
     dimensions.
      */
     if (axisDist < 0 && curr.left != null) {
-      return knnHelper(k, target, curr.left, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
+      return knnHelper(k, target, curr.left, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
     } else if (axisDist > 0 && curr.right != null) {
-      return knnHelper(k, target, curr.right, neighbors, furthest, (axis == axes.length - 1) ? 0 : axis+1);
+      return knnHelper(k, target, curr.right, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
     }
-    return neighbors.toArray(new Runway[0]);
+    return neighbors.toArray(new RecommenderResponse[0]);
   }
 
   /*
   Helper method to find the furthest neighbor and return its index and distance as an array.
    */
-  private int[] findFurthest(int[] target, List<Runway> neighbors) {
+  private int[] findFurthest(int[] target, List<RecommenderResponse> neighbors) {
     int index = 0;
     int dist = 0;
-    for (Runway n : neighbors) {
-      int nDist = euclideanDistance(target[0], target[1], target[2], n);
+    for (RecommenderResponse n : neighbors) {
+      int nDist = euclideanDistance(target, n);
       dist = Math.max(dist, nDist);
       if (dist == nDist) {
         index = neighbors.indexOf(n);
@@ -269,22 +241,25 @@ public class KDTree {
   A helper function that gets the straight line distance between a target point and
   a given user (in terms of weight height and age).
    */
-  private int euclideanDistance(int x, int y, int z, Runway r) {
-    return (int) Math.abs(Math.sqrt(Math.pow(x - r.getWeight(), 2)
-        + Math.pow(y - r.getHeight(), 2) + Math.pow(z - r.getAge(), 2)));
+  private int euclideanDistance(int[] target, RecommenderResponse r) {
+    int sum = 0;
+    for(int i = 0; i< numAxes; i++){
+      sum += Math.pow(target[i] - r.getSkills(i), 2);
+    }
+    return (int) Math.sqrt(sum);
   }
   //public version for testing
-  public int euclideanDistance(Runway r1, Runway r2) {
-    return (int) Math.abs(Math.sqrt(Math.pow(r1.getWeight() - r2.getWeight(), 2)
-        + Math.pow(r1.getHeight() - r2.getHeight(), 2) + Math.pow(r1.getAge() - r2.getAge(), 2)));
-  }
+//  public int euclideanDistance(RecommenderResponse r1, RecommenderResponse r2) {
+//    return (int) Math.abs(Math.sqrt(Math.pow(r1.getWeight() - r2.getWeight(), 2)
+//        + Math.pow(r1.getHeight() - r2.getHeight(), 2) + Math.pow(r1.getAge() - r2.getAge(), 2)));
+//  }
 
   public ArrayList<KDNode> getNodes() {
     return nodeList;
   }
 
   public class KDNode {
-    private Runway data;
+    private RecommenderResponse data;
     private KDNode left;
     private KDNode right;
     // know your indices in each of the 3 sortedTables. indices match up to axes
@@ -309,9 +284,10 @@ public class KDTree {
       return left;
     }
 
-    public Runway getData(){
+    public RecommenderResponse getData(){
       return data;
     }
+
     public void setIndex(int axis, int index){
       try{
         indicesAndRanges.get(axis).add(0,index);
@@ -358,7 +334,7 @@ public class KDTree {
     }
 
     public boolean inRange(KDNode node){
-      for(int i = 0; i < axes.length; i++){
+      for(int i = 0; i < numAxes; i++){
         if(!inRange(i, node.getIndex(i))){
           return false;
         }

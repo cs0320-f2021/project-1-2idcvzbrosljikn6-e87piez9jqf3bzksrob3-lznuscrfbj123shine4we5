@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -24,10 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import edu.brown.cs.student.apiClient.ApiClient;
 import edu.brown.cs.student.orm.Database;
-import edu.brown.cs.student.recommender.Interests;
-import edu.brown.cs.student.recommender.RecommenderImpl;
-import edu.brown.cs.student.recommender.RecommenderResponse;
-import edu.brown.cs.student.recommender.Skills;
+import edu.brown.cs.student.recommender.*;
 import edu.brown.cs.student.runway.Runway;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -141,12 +137,37 @@ public final class Main {
     commands.put("similar", this::similarHelper);
     commands.put("classify", this::classifyReplHelper);
     commands.put("recsys_load", this::loadHelper);
+    commands.put("recsys_rec", this::recHelper);
     return commands;
+  }
+
+  private void recHelper(String[] arguments){
+    if (arguments.length != 3) {
+      System.out.println("ERROR: Invalid argument.");
+      System.out.println("Valid usage: recsys_rec <num recs> <student_id>");
+      return;
+    }
+
+    try{
+      edu.brown.cs.student.recommender.RecommenderResponse userR = recommender.getResponse(arguments[2]);
+      List<edu.brown.cs.student.recommender.RecommenderResponse> rList = recommender.getTopKRecommendations(
+              userR, Integer.parseInt(arguments[1]));
+
+      for(edu.brown.cs.student.recommender.RecommenderResponse n : rList){
+        System.out.println(n.getId());
+      }
+
+    } catch(IllegalArgumentException e) {
+      System.out.println("ERROR: Second argument must be a user ID.");
+    }
+
+
+
   }
 
   private void loadHelper(String[] arguments) {
     /*
-    if second argument is "responses" continue else print "inavalid argument"
+    if second argument is "responses" continue else print "invalid argument"
 
     aData = data from Api
     bData =  data from Database
@@ -162,10 +183,10 @@ public final class Main {
     }
 
 //    RecommenderResponse[] responses = client.recommenderUsers();
-      RecommenderResponse[] responses = client.localRecommenderUsers();
+      edu.brown.cs.student.recommender.RecommenderResponse[] responses = client.localRecommenderUsers();
     try {
       Database db = new Database("data/integration.sqlite3");
-      for (RecommenderResponse response: responses) {
+      for (edu.brown.cs.student.recommender.RecommenderResponse response: responses) {
         response.fetchDatabaseData(db);
       }
 
@@ -194,7 +215,7 @@ public final class Main {
       for (Runway user : DataStore.getRunways()) {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
-            Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+            RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
                     user.getWeight(), user.getHeight(), user.getAge());
             classifyHelper(classify);
             userExists = true;
@@ -210,7 +231,7 @@ public final class Main {
       }
     } else if (arguments.length == 5) {
       try {
-        Runway[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+        RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
                 Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4]));
@@ -236,12 +257,12 @@ public final class Main {
     // if userID input
     if (arguments.length == 3) {
       boolean userExists = false;
-      for (Runway user : DataStore.getRunways()) {
+      for (RecommenderResponse user : DataStore.getRunways()) {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
-            Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+            RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
                     user.getWeight(), user.getHeight(), user.getAge());
-            for (Runway neighbor : similar) {
+            for (RecommenderResponse neighbor : similar) {
               System.out.println(neighbor.getUserId());
             }
             userExists = true;
@@ -257,11 +278,11 @@ public final class Main {
       }
     } else if (arguments.length == 5) { //if coordinate input
       try {
-        Runway[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+        RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
                 Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4]));
-        for (Runway neighbor : similar) {
+        for (RecommenderResponse neighbor : similar) {
           System.out.println(neighbor.getUserId());
         }
       } catch (NumberFormatException e) {
@@ -277,13 +298,13 @@ public final class Main {
    * table.
    * @param classify the array of users (Runway) to print the zodiacs of
    */
-  private void classifyHelper(Runway[] classify) {
+  private void classifyHelper(RecommenderResponse[] classify) {
     Hashtable<String, Integer> zodiac = new Hashtable<>();
     String[] signs = new String[] {"Aries", "Taurus", "Gemini",
         "Cancer", "Leo", "Virgo",
         "Libra", "Scorpio", "Sagittarius",
         "Capricorn", "Aquarius", "Pisces"};
-    for (Runway user : classify) {
+    for (RecommenderResponse user : classify) {
       zodiac.put(user.getHoroscope(), zodiac.getOrDefault(user.getHoroscope(), 0) + 1);
     }
     for (String sign : signs) {
@@ -311,10 +332,10 @@ public final class Main {
     }
 
     try {
-      Runway[] data;
+      RecommenderResponse[] data;
       if (!usersLoaded) { // if data hasn't already been loaded through the API
         String json = ApiClient.normaliseJson(Files.readString(Path.of(arguments[1])).strip());
-        data = new Gson().fromJson(json, Runway[].class);
+        data = new Gson().fromJson(json, RecommenderResponse[].class);
         DataStore.setRunways(data);
       } else {
         data = DataStore.getRunways();

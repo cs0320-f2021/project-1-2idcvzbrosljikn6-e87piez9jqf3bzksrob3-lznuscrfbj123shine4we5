@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import edu.brown.cs.student.main.DataStore;
 import edu.brown.cs.student.main.FileParser;
-import edu.brown.cs.student.recommender.RecommenderResponse;
 import edu.brown.cs.student.runway.Rent;
 import edu.brown.cs.student.runway.Review;
 import edu.brown.cs.student.runway.Runway;
@@ -36,16 +35,16 @@ public class ApiClient {
         .build();
   }
 
-  public RecommenderResponse[] localRecommenderUsers() {
+  public edu.brown.cs.student.recommender.RecommenderResponse[] localRecommenderUsers() {
     return new Gson().fromJson(FileParser.readIntoString("data/integration.json"),
-        RecommenderResponse[].class);
+        edu.brown.cs.student.recommender.RecommenderResponse[].class);
   }
 
   /**
    * Helper method that returns an array of Responses if successful, null otherwise
    * @return array of Response data with ORM data yet to be added to it
    */
-  public RecommenderResponse[] recommenderUsers() {
+  public edu.brown.cs.student.recommender.RecommenderResponse[] recommenderUsers() {
     String reqUri = "https://runwayapi.herokuapp.com/integration";
     HttpResponse<String> userData = null;
     try {
@@ -56,7 +55,7 @@ public class ApiClient {
 
 //      System.out.println(userData.body());
 
-      return new Gson().fromJson(userData.body(), RecommenderResponse[].class);
+      return new Gson().fromJson(userData.body(), edu.brown.cs.student.recommender.RecommenderResponse[].class);
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }

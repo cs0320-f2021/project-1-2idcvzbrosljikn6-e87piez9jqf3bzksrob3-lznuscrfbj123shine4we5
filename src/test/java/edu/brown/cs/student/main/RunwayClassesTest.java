@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 import edu.brown.cs.student.apiClient.ApiClient;
 import edu.brown.cs.student.runway.Rent;
 import edu.brown.cs.student.runway.Review;
-import edu.brown.cs.student.runway.Runway;
+import edu.brown.cs.student.runway.RecommenderResponse;
 import edu.brown.cs.student.runway.User;
 import org.junit.Test;
 
@@ -37,9 +37,9 @@ public class RunwayClassesTest {
   public void testRunway() {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/runwaySMALL.json"));
-    Runway[] data = new Gson().fromJson(json, Runway[].class);
+    RecommenderResponse[] data = new Gson().fromJson(json, RecommenderResponse[].class);
     assertEquals(data.length, RESULT_LENGTH_2);
-    for (Runway u: data) {
+    for (RecommenderResponse u: data) {
       assertNotNull(u.getBodyType());
       assertNotNull(u.getBustSize());
       assertNotNull(u.getHoroscope());
@@ -79,9 +79,9 @@ public class RunwayClassesTest {
   public void testRunwayUserOverlap() {
     String json =
         ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justusersSMALL.json"));
-    Runway[] data = new Gson().fromJson(json, Runway[].class);
+    RecommenderResponse[] data = new Gson().fromJson(json, RecommenderResponse[].class);
     assertEquals(data.length, RESULT_LENGTH_1);
-    for (Runway u: data) {
+    for (RecommenderResponse u: data) {
       assertNotNull(u.getBustSize());
       assertNotNull(u.getHoroscope());
       assertNull(u.getCategory());
