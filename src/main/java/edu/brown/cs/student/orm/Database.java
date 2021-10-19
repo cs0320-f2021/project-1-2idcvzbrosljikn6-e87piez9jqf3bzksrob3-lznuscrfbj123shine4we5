@@ -69,7 +69,6 @@ public class Database {
 
     }
     String sql = "INSERT INTO " + tableName + " (" + attributeNames + ") VALUES (" + values + ");";
-    System.out.println(sql);
     sqlWithParams(sql, insertValues);
   }
 
@@ -121,7 +120,6 @@ public class Database {
     }
 
     String sql = "DELETE FROM " + tableName + " WHERE (" + values + ");";
-    System.out.println(sql);
     sqlWithParams(sql, params);
   }
 
@@ -176,7 +174,6 @@ public class Database {
     }
 
     String sql = "UPDATE " + tableName + " SET " + updationFields + " WHERE (" + values + ");";
-    System.out.println(sql);
     sqlWithParams(sql, params);
   }
 
@@ -215,7 +212,6 @@ public class Database {
     }
 
     String sql = "SELECT * FROM " + tableName + " WHERE " + wheres + ";";
-    System.out.println(sql);
     return sqlListQuery(c, sql, params);
   }
 
@@ -239,7 +235,6 @@ public class Database {
       T node = (T) (c.getDeclaredConstructor(Map.class).newInstance(mapper));
       output.add(node);
     }
-    System.out.println(output.size());
     return output;
   }
 }
