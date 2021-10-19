@@ -12,21 +12,21 @@ import java.util.List;
 
 public class KDTreeTest {
 
-  @Test
-  public void testTreeBuild() throws Exception {
-    new ApiClient().usersApiCall(true);
-    Runway[] data = DataStore.getRunways();
-    String[] axes = new String[] {"weight", "height", "age"};
-
-    KDTree kd = new KDTree(data,axes);
-    for(KDTree.KDNode node : kd.getNodes()){
-      assertTrue(node.getLeft() == null ||
-          node.getLeft().getIndex(node.getAxis()) < node.getIndex(node.getAxis()));
-      assertTrue(node.getRight() == null ||
-          node.getRight().getIndex(node.getAxis()) > node.getIndex(node.getAxis()));
-    }
-    assertEquals(kd.getNodes().size(),data.length);
-  }
+//  @Test
+//  public void testTreeBuild() throws Exception {
+//    new ApiClient().usersApiCall(true);
+//    Runway[] data = DataStore.getRunways();
+//    String[] axes = new String[] {"weight", "height", "age"};
+//
+//    KDTree kd = new KDTree(data,axes);
+//    for(KDTree.KDNode node : kd.getNodes()){
+//      assertTrue(node.getLeft() == null ||
+//          node.getLeft().getIndex(node.getAxis()) < node.getIndex(node.getAxis()));
+//      assertTrue(node.getRight() == null ||
+//          node.getRight().getIndex(node.getAxis()) > node.getIndex(node.getAxis()));
+//    }
+//    assertEquals(kd.getNodes().size(),data.length);
+//  }
 //  @Test
 //  public void testKNN() throws Exception{
 //    new ApiClient().usersApiCall(true);
@@ -68,6 +68,6 @@ public class KDTreeTest {
 //            >= kd.euclideanDistance(node.getData(), nn.get(nn.size()-1)));
 //      }
 //    }
-  }
+//  }
 //
 }
