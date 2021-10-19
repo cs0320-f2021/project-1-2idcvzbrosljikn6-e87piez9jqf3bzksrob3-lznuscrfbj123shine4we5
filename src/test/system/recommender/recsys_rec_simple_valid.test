@@ -1,8 +1,12 @@
 INPUT
 recsys_load responses
 recsys_rec 3 5
+recsys_rec 2 5
 OUTPUT
+Loaded Recommender with 61 students.
 31
 26
 27
+31
+26
 END
