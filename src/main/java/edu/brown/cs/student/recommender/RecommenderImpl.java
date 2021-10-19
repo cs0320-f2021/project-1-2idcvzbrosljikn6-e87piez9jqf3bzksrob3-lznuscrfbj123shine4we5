@@ -8,10 +8,8 @@ package edu.brown.cs.student.recommender;
  */
 
 
-import edu.brown.cs.student.bloomfilter.BloomFilter;
 import edu.brown.cs.student.bloomfilter.BloomFilterRecommender;
 import edu.brown.cs.student.main.KDTree;
-import org.checkerframework.checker.units.qual.K;
 
 import java.util.*;
 
@@ -70,7 +68,7 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
           continue;
         }
         r.setCompatibilityList(getTopKRecommendations(r, dataMap.size()));
-;      }
+      }
 
 
       /*
@@ -105,7 +103,56 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
               }
               j++;
           }
-          groups.add(group);
+          /*
+          If the final group has too few members due to
+          the students not breaking evenly into k groups...
+           */
+          if(group.size() < k){
+            System.out.println(dataMap.size() + "students do not divide evenly into " + k + " groups.");
+            /*
+            if it's k-1 just print a notification of the smaller group
+             */
+            if(group.size() == k-1){
+              System.out.println("The final group consists of " + (k-1) + " students.");
+            }
+            /*
+            else if group.size() <= groups.size(), put them all in other groups
+            such that all groups are either k or k+1, then notify
+             */
+            else if(group.size() <= groups.size()){
+              int count = 1;
+              for(RecommenderResponse r : group){
+                groups.get(groups.size()-count).add(r);
+                count++;
+              }
+              System.out.println("Reallocations have been made. " + (count-1) + "out of " +
+                  groups.size() + " groups now have " + (k+1) + " members.");
+            }
+            /*
+            else if numExtras + numGroups >= k-1, take 1 random member
+            off existing groups until extra group has size k-1. For example, if you have 4
+            groups of 15 and 1 group of 13, you should make it into 3 groups of 15 and 2 groups
+            of 14.
+             */
+            else if(group.size() + groups.size() >= k-1){
+              int count = 0;
+              while(group.size() < k-1){
+                Set<RecommenderResponse> g = groups.get(count);
+                RecommenderResponse student = g.iterator().next();
+                g.remove(student);
+                group.add(student);
+                count++;
+              }
+              groups.add(group);
+              System.out.println("Reallocations have been made. " + count + "out of " +
+                  (groups.size()) + " groups now have " + (k-1) + " members.");
+            }else{
+              groups.add(group);
+              System.out.println("The final group has only " + group.size() + " members.");
+            }
+          } else{
+            groups.add(group);
+          }
           if (total == dataMap.size()) {
             break;
           }
