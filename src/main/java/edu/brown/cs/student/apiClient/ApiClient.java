@@ -41,7 +41,8 @@ public class ApiClient {
   }
 
   /**
-   * Helper method that returns an array of Responses if successful, null otherwise
+   * Helper method that returns an array of Responses if successful, null otherwise.
+   *
    * @return array of Response data with ORM data yet to be added to it
    */
   public edu.brown.cs.student.recommender.RecommenderResponse[] recommenderUsers() {
@@ -49,13 +50,14 @@ public class ApiClient {
     HttpResponse<String> userData = null;
     try {
       userData = client.send(HttpRequest.newBuilder(URI.create(reqUri))
-          .POST(HttpRequest.BodyPublishers.ofString(ClientAuth.getJsonUserAuth())).header("x-api" +
-                      "-key", ClientAuth.getApiKey()).build(),
+              .POST(HttpRequest.BodyPublishers.ofString(ClientAuth.getJsonUserAuth()))
+              .header("x-api-key", ClientAuth.getApiKey()).build(),
           HttpResponse.BodyHandlers.ofString());
 
 //      System.out.println(userData.body());
 
-      return new Gson().fromJson(userData.body(), edu.brown.cs.student.recommender.RecommenderResponse[].class);
+      return new Gson().fromJson(userData.body(),
+          edu.brown.cs.student.recommender.RecommenderResponse[].class);
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }
@@ -66,6 +68,7 @@ public class ApiClient {
   /**
    * Method called when the user requests user data from the endpoints.
    * Stores retrieved data in the DataStore
+   *
    * @param loadRunways whether to load user data as runway data, for the KD tree.
    *                    The KD tree uses Runways and Gson handles the missing attributes, so this
    *                    works.
@@ -168,6 +171,7 @@ public class ApiClient {
    * backup endpoint.
    * The timeout chosen was determined through trial and error, providing a good balance between
    * speed and reliability.
+   *
    * @param req the request to make
    * @return the body of the request is successful, ERROR otherwise
    */
@@ -209,6 +213,7 @@ public class ApiClient {
 
   /**
    * Helper method that checks for json list validity.
+   *
    * @param json a String to normalise
    * @return the normalised String
    */

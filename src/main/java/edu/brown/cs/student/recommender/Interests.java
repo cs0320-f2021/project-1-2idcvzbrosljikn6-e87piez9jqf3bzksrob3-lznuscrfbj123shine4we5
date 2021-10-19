@@ -7,7 +7,7 @@ public class Interests {
   private String interest;
 
   /**
-   * Class representing a row of the interests table in integration.sqlite3
+   * Class representing a row of the interests table in integration.sqlite3.
    * @param map of id and interest to value, from the table
    */
   public Interests(Map<String, String> map) {

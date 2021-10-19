@@ -7,7 +7,7 @@ public class Positive {
   private String trait;
 
   /**
-   * Class representing a row of the positive table in integration.sqlite3
+   * Class representing a row of the positive table in integration.sqlite3.
    * @param map of id and trait to value, from the table
    */
   public Positive(Map<String, String> map) {

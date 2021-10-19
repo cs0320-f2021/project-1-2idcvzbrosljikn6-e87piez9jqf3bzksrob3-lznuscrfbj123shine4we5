@@ -7,21 +7,22 @@ public class Skills {
   private String name;
   private int commenting;
   private int testing;
-  private int OOP;
+  private int oop;
   private int algorithms;
   private int teamwork;
   private int frontend;
 
   /**
-   * Class representing a row of the skills table in integration.sqlite3
-   * @param map of all skills to gvalue, from the table
+   * Class representing a row of the skills table in integration.sqlite3.
+   *
+   * @param map of all skills to values, from the table
    */
   public Skills(Map<String, String> map) {
     id = Integer.parseInt(map.get("id"));
     name = map.get("name");
     commenting = Integer.parseInt(map.get("commenting"));
     testing = Integer.parseInt(map.get("testing"));
-    OOP = Integer.parseInt(map.get("OOP"));
+    oop = Integer.parseInt(map.get("OOP"));
     algorithms = Integer.parseInt(map.get("algorithms"));
     teamwork = Integer.parseInt(map.get("teamwork"));
     frontend = Integer.parseInt(map.get("frontend"));
@@ -43,8 +44,8 @@ public class Skills {
     return testing;
   }
 
-  public int getOOP() {
-    return OOP;
+  public int getOop() {
+    return oop;
   }
 
   public int getAlgorithms() {

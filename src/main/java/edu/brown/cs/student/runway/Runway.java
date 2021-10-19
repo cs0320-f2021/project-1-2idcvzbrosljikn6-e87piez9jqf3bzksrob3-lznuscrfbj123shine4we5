@@ -161,7 +161,7 @@ public class Runway implements KDTreeItem {
 
   @Override
   public int getAxis(int i) {
-    switch (i){
+    switch (i) {
       case 0:
         return getWeight();
       case 1:

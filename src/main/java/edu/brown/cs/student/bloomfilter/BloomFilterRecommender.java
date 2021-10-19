@@ -34,7 +34,8 @@ public class BloomFilterRecommender<T extends Item> implements Recommender<T> {
     // construct a bloom filter for each item containing the attributes of that item
     this.bloomFilters = new HashMap<>();
     for (Map.Entry<String, T> entry : this.items.entrySet()) {
-      BloomFilter<String> currFilter = new BloomFilter<>(desiredFalsePositiveRate, this.maxNumValues);
+      BloomFilter<String> currFilter =
+          new BloomFilter<>(desiredFalsePositiveRate, this.maxNumValues);
       List<String> itemVector = entry.getValue().getVectorRepresentation();
       for (String s : itemVector) {
         currFilter.add(s);
@@ -52,7 +53,8 @@ public class BloomFilterRecommender<T extends Item> implements Recommender<T> {
 //    }
 
 
-    BloomFilter<String> inputFilter = new BloomFilter<>(desiredFalsePositiveRate, this.maxNumValues);
+    BloomFilter<String> inputFilter =
+        new BloomFilter<>(desiredFalsePositiveRate, this.maxNumValues);
     setBloomFilterComparator(new AndSimilarityComparator(inputFilter));
     List<String> inputItemVector = item.getVectorRepresentation();
     for (String s : inputItemVector) {

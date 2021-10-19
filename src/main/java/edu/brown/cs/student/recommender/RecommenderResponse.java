@@ -5,8 +5,11 @@ import edu.brown.cs.student.orm.Database;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RecommenderResponse implements Item, KDTreeItem {
 
@@ -15,7 +18,7 @@ public class RecommenderResponse implements Item, KDTreeItem {
   private String meeting;
   private String grade;
   private List<RecommenderResponse> compatibilityList;
-  public boolean inGroup = false;
+  private boolean inGroup = false;
 
   @SerializedName("years_of_experience")
   private String experience;
@@ -42,17 +45,18 @@ public class RecommenderResponse implements Item, KDTreeItem {
 
   private int commenting;
   private int testing;
-  private int OOP;
+  private int oop;
   private int algorithms;
   private int teamwork;
   private int frontend;
-  public final int[] skillArr = new int[] {commenting,testing,OOP,algorithms,teamwork,frontend};
+  private final int[] skillArr =
+      new int[] {commenting, testing, oop, algorithms, teamwork, frontend};
 
 
   @Override
   public List<String> getVectorRepresentation() {
     List vector = new ArrayList<>(Arrays.asList(experience, horoscope, meetingTimes,
-    preferredLanguage, marginalizedGroups, preferGroup));
+        preferredLanguage, marginalizedGroups, preferGroup));
     for (String elt : interests) {
       vector.add(elt);
     }
@@ -70,24 +74,24 @@ public class RecommenderResponse implements Item, KDTreeItem {
     return id;
   }
 
-  public int[] getSkills(){
-    return skillArr;
+  public int[] getSkills() {
+    return getSkillArr();
   }
 
-  public void setCompatibilityList(List<RecommenderResponse> list){
+  public void setCompatibilityList(List<RecommenderResponse> list) {
     compatibilityList = list;
   }
 
-  public List<RecommenderResponse> getCompatibilityList(){
+  public List<RecommenderResponse> getCompatibilityList() {
     return compatibilityList;
   }
 
-  public boolean hasCompatibilityList(){
+  public boolean hasCompatibilityList() {
     return (compatibilityList != null);
   }
 
-  public int getSkills(int s){
-    return skillArr[s];
+  public int getSkills(int s) {
+    return getSkillArr()[s];
   }
 
   public String getName() {
@@ -128,6 +132,7 @@ public class RecommenderResponse implements Item, KDTreeItem {
 
   /**
    * Helper method that fetches data from the database for this id and loads it into the instance.
+   *
    * @param db the instance of the Database class used to fetch data from
    */
   public void fetchDatabaseData(Database db) {
@@ -138,20 +143,20 @@ public class RecommenderResponse implements Item, KDTreeItem {
       List<Negative> n = db.select(Negative.class, queryParams);
       List<Positive> p = db.select(Positive.class, queryParams);
       List<Skills> s = db.select(Skills.class, queryParams);
-      for (Interests interest: i) {
+      for (Interests interest : i) {
         interests.add(interest.getInterest());
       }
-      for (Negative negative: n) {
+      for (Negative negative : n) {
         negativeTraits.add(negative.getTrait());
       }
-      for (Positive positive: p) {
+      for (Positive positive : p) {
         positiveTraits.add(positive.getTrait());
       }
 
       Skills skills = s.get(0);
       commenting = skills.getCommenting();
       testing = skills.getTesting();
-      OOP = skills.getOOP();
+      oop = skills.getOop();
       algorithms = skills.getAlgorithms();
       teamwork = skills.getTeamwork();
       frontend = skills.getFrontend();
@@ -177,8 +182,8 @@ public class RecommenderResponse implements Item, KDTreeItem {
     return testing;
   }
 
-  public int getOOP() {
-    return OOP;
+  public int getOop() {
+    return oop;
   }
 
   public int getAlgorithms() {
@@ -198,15 +203,27 @@ public class RecommenderResponse implements Item, KDTreeItem {
   }
 
   public ArrayList<String> getNegativeTraits() {
-    return new ArrayList<> (negativeTraits);
+    return new ArrayList<>(negativeTraits);
   }
 
   public ArrayList<String> getPositiveTraits() {
-    return new ArrayList<> (positiveTraits);
+    return new ArrayList<>(positiveTraits);
   }
 
   @Override
   public int getAxis(int i) {
-    return skillArr[i];
+    return getSkillArr()[i];
+  }
+
+  public boolean isInGroup() {
+    return inGroup;
+  }
+
+  public void setInGroup(boolean inGroup) {
+    this.inGroup = inGroup;
+  }
+
+  public int[] getSkillArr() {
+    return skillArr;
   }
 }

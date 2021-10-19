@@ -8,35 +8,37 @@ package edu.brown.cs.student.recommender;
  */
 
 
-import edu.brown.cs.student.bloomfilter.BloomFilter;
 import edu.brown.cs.student.bloomfilter.BloomFilterRecommender;
 import edu.brown.cs.student.main.KDTree;
-import org.checkerframework.checker.units.qual.K;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
   private HashMap<String, RecommenderResponse> dataMap;
   private KDTree<RecommenderResponse> tree;
   private BloomFilterRecommender<RecommenderResponse> bfr;
+  private static final double FALSE_POSITIVE_RATE = 0.01;
 
+  public RecommenderImpl(RecommenderResponse[] responses) {
+    dataMap = new HashMap<>();
+    for (RecommenderResponse r : responses) {
+      dataMap.put(r.getId(), r);
+    }
 
-    public RecommenderImpl(RecommenderResponse[] responses) {
-      dataMap = new HashMap<>();
-      for (RecommenderResponse r: responses) {
-        dataMap.put(r.getId(), r);
-      }
+    //Make KDTree and BloomFilter with dataMap data
+    bfr = new BloomFilterRecommender<>(dataMap, FALSE_POSITIVE_RATE);
+    tree = new KDTree<>(responses, 6);
 
-      //Make KDTree and BloomFilter with dataMap data
-      bfr = new BloomFilterRecommender<>(dataMap, 0.01);
-      tree = new KDTree<>(responses, 6);
-
-      System.out.println("Loaded Recommender with " + responses.length + " students.");
+    System.out.println("Loaded Recommender with " + responses.length + " students.");
   }
 
-  public RecommenderResponse getResponse(String id){
-      return dataMap.get(id);
+  public RecommenderResponse getResponse(String id) {
+    return dataMap.get(id);
   }
 
 
@@ -55,31 +57,32 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
     List<RecommenderResponse> result = new ArrayList<>(bfrList);
     result.sort(Comparator.comparingInt(o -> (treeList.indexOf(o) + bfrList.indexOf(o))));
 
-    //if k is the size of the whole data set, save this list as the person's compatibility list while we're here.
-    if(k == dataMap.size()){
+    //if k is the size of the whole data set, save this list as the person's
+    // compatibility list while we're here.
+    if (k == dataMap.size()) {
       target.setCompatibilityList(result);
       return result;
     }
     return result.subList(0, k);
   }
 
-  public List<HashSet<RecommenderResponse>> generateGroups(int k){
-      //Generate a compatibility list for all users without an existing one.
-      for(RecommenderResponse r: dataMap.values()){
-        if(r.hasCompatibilityList()){
-          continue;
-        }
-        r.setCompatibilityList(getTopKRecommendations(r, dataMap.size()));
-;      }
+  public List<HashSet<RecommenderResponse>> generateGroups(int k) {
+    //Generate a compatibility list for all users without an existing one.
+    for (RecommenderResponse r : dataMap.values()) {
+      if (r.hasCompatibilityList()) {
+        continue;
+      }
+      r.setCompatibilityList(getTopKRecommendations(r, dataMap.size()));
+    }
 
 
       /*
       create sorted list of responses by average compatibility score — that is, their average
       index in all other individual compatibility lists.
        */
-      List<RecommenderResponse> ACList = new ArrayList<>(dataMap.values());
-      ACList.forEach(response -> response.inGroup = false);
-      ACList.sort(Comparator.comparingInt(this::avgCompatibilityScore));
+    List<RecommenderResponse> averageCompatibilities = new ArrayList<>(dataMap.values());
+    averageCompatibilities.forEach(response -> response.setInGroup(false));
+    averageCompatibilities.sort(Comparator.comparingInt(this::avgCompatibilityScore));
 
       /* More compatible people have lower average compatibility scores, because
       it's calculated by taking the average index of the person's response in
@@ -89,52 +92,53 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       will fall at the top. This is why we start at the end of the list and move
       up.
        */
-      List<HashSet<RecommenderResponse>> groups = new ArrayList<>();
+    List<HashSet<RecommenderResponse>> groups = new ArrayList<>();
 
-      int total = 0;
-      for(int i = dataMap.size()-1; i >= 0; i--){
-          //find the top K recommendations, which should just be the first K people in their compatibility list.
-          HashSet<RecommenderResponse> group = new HashSet<>();
-          int j = 0;
-          RecommenderResponse currentMember = ACList.get(i);
-          if (currentMember.inGroup) {
-            break;
-          } else {
-            group.add(currentMember);
-            currentMember.inGroup = true;
-            total++;
-          }
-          while(group.size() < k && j < dataMap.size() - 1) {
-              RecommenderResponse groupMate = ACList.get(i).getCompatibilityList().get(j);
-              if (!groupMate.inGroup){
-                  group.add(groupMate);
-                  groupMate.inGroup = true;
-                  total+=1;
-              }
-              j++;
-          }
-        System.out.println(group.size());
-        System.out.println(k);
-          groups.add(group);
-          if (total == dataMap.size()) {
-            break;
-          }
+    int total = 0;
+    for (int i = dataMap.size() - 1; i >= 0; i--) {
+      //find the top K recommendations, which should just be the first K people
+      // in their compatibility list.
+      HashSet<RecommenderResponse> group = new HashSet<>();
+      int j = 0;
+      RecommenderResponse currentMember = averageCompatibilities.get(i);
+      if (currentMember.isInGroup()) {
+        break;
+      } else {
+        group.add(currentMember);
+        currentMember.setInGroup(true);
+        total++;
       }
-      return groups;
+      while (group.size() < k && j < dataMap.size() - 1) {
+        RecommenderResponse groupMate = averageCompatibilities.get(i).getCompatibilityList().get(j);
+        if (!groupMate.isInGroup()) {
+          group.add(groupMate);
+          groupMate.setInGroup(true);
+          total += 1;
+        }
+        j++;
+      }
+      System.out.println(group.size());
+      System.out.println(k);
+      groups.add(group);
+      if (total == dataMap.size()) {
+        break;
+      }
+    }
+    return groups;
   }
 
-  private int avgCompatibilityScore(RecommenderResponse response){
-      int sum = 0;
-      for(RecommenderResponse r : dataMap.values()){
-        if(r != response) {
-          sum += r.getCompatibilityList().indexOf(response);
-        }
+  private int avgCompatibilityScore(RecommenderResponse response) {
+    int sum = 0;
+    for (RecommenderResponse r : dataMap.values()) {
+      if (r != response) {
+        sum += r.getCompatibilityList().indexOf(response);
       }
-      try{
-        return sum/dataMap.size();
-      } catch(ArithmeticException e){
-        System.out.println("Error: No recommendations available. Try loading more responses.");
-        return 0;
-      }
+    }
+    try {
+      return sum / dataMap.size();
+    } catch (ArithmeticException e) {
+      System.out.println("Error: No recommendations available. Try loading more responses.");
+      return 0;
+    }
   }
 }

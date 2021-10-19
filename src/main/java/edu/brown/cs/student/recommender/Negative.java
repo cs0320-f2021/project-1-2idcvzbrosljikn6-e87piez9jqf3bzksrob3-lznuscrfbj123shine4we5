@@ -7,7 +7,7 @@ public class Negative {
   private String trait;
 
   /**
-   * Class representing a row of the negative table in integration.sqlite3
+   * Class representing a row of the negative table in integration.sqlite3.
    * @param map of id and trait to value, from the table
    */
   public Negative(Map<String, String> map) {

@@ -24,6 +24,7 @@ public final class ClientAuth {
 
   /**
    * Reads the JSON user auth code from the secret text file where we have stored it.
+   *
    * @return a String of the JSON of the user auth code in the format {"auth":"<cslogin>"}
    */
   public static String getJsonUserAuth() {
@@ -33,6 +34,7 @@ public final class ClientAuth {
 
   /**
    * Reads the API key from the secret text file where we have stored it.
+   *
    * @return a String of the API key
    */
   public static String getApiKey() {

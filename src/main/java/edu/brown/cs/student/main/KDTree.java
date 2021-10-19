@@ -2,12 +2,14 @@ package edu.brown.cs.student.main;
 
 import edu.brown.cs.student.recommender.KDTreeItem;
 
-import java.lang.reflect.Array;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 
 public class KDTree<T extends KDTreeItem> {
-  private final ArrayList<Hashtable<Integer,KDNode>> sortedTables;
+  private final ArrayList<Hashtable<Integer, KDNode>> sortedTables;
   private final LinkedList<KDNode> nodeQueue;
   private final KDNode root;
   private final int numAxes;
@@ -24,10 +26,10 @@ public class KDTree<T extends KDTreeItem> {
     //created hashtables of the data sorted by each s
     //temp solution
     int[] skillArr = new int[numAxes];
-    for(int i = 0; i < numAxes; i++){
+    for (int i = 0; i < numAxes; i++) {
       skillArr[i] = i;
     }
-    for(int skill : skillArr) {
+    for (int skill : skillArr) {
       nodeList.sort((o1, o2) -> {
         try {
           return (int) (o1.data.getAxis(skill) - o2.data.getAxis(skill));
@@ -37,11 +39,11 @@ public class KDTree<T extends KDTreeItem> {
         }
       });
       Hashtable<Integer, KDNode> table = new Hashtable<>();
-      for(int i = 0; i < nodeList.size(); i++){
+      for (int i = 0; i < nodeList.size(); i++) {
         KDNode n = nodeList.get(i);
         table.put(i, n);
-        n.setIndex(skill,i);
-        n.setRange(skill,0,nodeList.size()-1);
+        n.setIndex(skill, i);
+        n.setRange(skill, 0, nodeList.size() - 1);
       }
       sortedTables.add(table);
     }
@@ -58,14 +60,14 @@ public class KDTree<T extends KDTreeItem> {
     nodeQueue.add(root);
     root.axis = 0;
 
-    while(!nodeQueue.isEmpty()){
+    while (!nodeQueue.isEmpty()) {
       setupChildren(nodeQueue.remove());
     }
   }
 
-  public ArrayList<KDNode> buildNodes(T[] data){
+  public ArrayList<KDNode> buildNodes(T[] data) {
     ArrayList<KDNode> nodes = new ArrayList<>();
-    for(T r: data){
+    for (T r : data) {
       KDNode node = new KDNode();
       node.data = r;
       nodes.add(node);
@@ -73,13 +75,13 @@ public class KDTree<T extends KDTreeItem> {
     return nodes;
   }
 
-  public void setupChildren(KDNode curr){
+  public void setupChildren(KDNode curr) {
     curr.right = findChild(curr, true);
     curr.left = findChild(curr, false);
   }
 
 
-  public KDNode getRoot(){
+  public KDNode getRoot() {
     return root;
   }
 
@@ -95,28 +97,28 @@ public class KDTree<T extends KDTreeItem> {
 
     A suitable child is both unvisited and located within all of curr's axial ranges.
      */
-    while (curr.inRange(curr.axis, i+dir) && !curr.isSuitable(table.get(i))) {
+    while (curr.inRange(curr.axis, i + dir) && !curr.isSuitable(table.get(i))) {
       i += dir;
     }
-    if(curr.isSuitable(table.get(i))){
+    if (curr.isSuitable(table.get(i))) {
       KDNode child = table.get(i);
       //mark node as visited
       child.visit();
 
       //set child's range in relevant axis to be half of original range
       child.setRange(curr.getAxis(),
-          (right)? curr.getIndex(curr.getAxis()) : curr.getMin(curr.getAxis()),
-          (right)? curr.getMax(curr.getAxis()) : curr.getIndex(curr.getAxis()));
+          (right) ? curr.getIndex(curr.getAxis()) : curr.getMin(curr.getAxis()),
+          (right) ? curr.getMax(curr.getAxis()) : curr.getIndex(curr.getAxis()));
 
       //for all other axes, child inherits the parent's range
-      for(int axis = 0; axis < numAxes; axis++){
-        if(axis != curr.getAxis()){
+      for (int axis = 0; axis < numAxes; axis++) {
+        if (axis != curr.getAxis()) {
           child.setRange(axis, curr.getMin(axis), curr.getMax(axis));
         }
       }
 
       //child's relevant axis set to next in the cycle
-      child.setAxis((curr.getAxis() < numAxes -1) ? curr.getAxis()+1 : 0);
+      child.setAxis((curr.getAxis() < numAxes - 1) ? curr.getAxis() + 1 : 0);
 
       //add child to queue
       nodeQueue.add(child);
@@ -146,7 +148,7 @@ public class KDTree<T extends KDTreeItem> {
   explained in the comments for knn().
    */
   private ArrayList<T> knnHelper(int k, int[] target, KDNode curr,
-                                          ArrayList<T> neighbors, int furthest, int axis) {
+                                 ArrayList<T> neighbors, int furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
     int eDist = euclideanDistance(target, curr.data);
 
@@ -161,10 +163,10 @@ public class KDTree<T extends KDTreeItem> {
           Comparator.comparingInt(o -> euclideanDistance(target, o)));
       if (neighbors.size() > k) {
         //if there are now more than k neighbors saved, remove the furthest neighbor.
-        neighbors.remove(neighbors.size()-1);
+        neighbors.remove(neighbors.size() - 1);
       }
       furthest = euclideanDistance(target,
-          neighbors.get(neighbors.size()-1));
+          neighbors.get(neighbors.size() - 1));
     }
 
     //If there are no children on which to recur, return current list of neighbors as array.
@@ -186,16 +188,17 @@ public class KDTree<T extends KDTreeItem> {
     if (furthest > Math.abs(axisDist) || neighbors.size() < k) {
       if (curr.left != null) {
         ArrayList<T> result = knnHelper(k, target, curr.left, neighbors, furthest,
-            (axis == numAxes - 1) ?
-            0 : axis+1);
+            (axis == numAxes - 1)
+                ? 0 : axis + 1);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.right, result, furthest, (axis == numAxes - 1) ? 0 :
-              axis+1);
+          return knnHelper(k, target, curr.right, result, furthest, (axis == numAxes - 1) ? 0
+              : axis + 1);
         } else {
           return result;
         }
       } else {
-        return knnHelper(k, target, curr.right, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
+        return knnHelper(k, target, curr.right, neighbors, furthest,
+            (axis == numAxes - 1) ? 0 : axis + 1);
       }
     }
 
@@ -218,9 +221,11 @@ public class KDTree<T extends KDTreeItem> {
     dimensions.
      */
     if (axisDist < 0 && curr.left != null) {
-      return knnHelper(k, target, curr.left, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
+      return knnHelper(k, target, curr.left, neighbors, furthest,
+          (axis == numAxes - 1) ? 0 : axis + 1);
     } else if (axisDist > 0 && curr.right != null) {
-      return knnHelper(k, target, curr.right, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
+      return knnHelper(k, target, curr.right, neighbors, furthest,
+          (axis == numAxes - 1) ? 0 : axis + 1);
     }
     return neighbors;
   }
@@ -247,7 +252,7 @@ public class KDTree<T extends KDTreeItem> {
    */
   private int euclideanDistance(int[] target, T r) {
     int sum = 0;
-    for(int i = 0; i< numAxes; i++){
+    for (int i = 0; i < numAxes; i++) {
       sum += Math.pow(target[i] - r.getAxis(i), 2);
     }
     return (int) Math.sqrt(sum);
@@ -272,81 +277,84 @@ public class KDTree<T extends KDTreeItem> {
     private int axis;
 
 
-    public void setAxis(int a){
+    public void setAxis(int a) {
       axis = a;
     }
 
-    public int getAxis(){
+    public int getAxis() {
       return axis;
     }
 
-    public KDNode getRight(){
+    public KDNode getRight() {
       return right;
     }
 
-    public KDNode getLeft(){
+    public KDNode getLeft() {
       return left;
     }
 
-    public T getData(){
+    public T getData() {
       return data;
     }
 
-    public void setIndex(int axis, int index){
-      try{
-        indicesAndRanges.get(axis).add(0,index);
-      }catch(IndexOutOfBoundsException e){
-        while(indicesAndRanges.size() <= axis){
+    public void setIndex(int currentAxis, int index) {
+      try {
+        indicesAndRanges.get(currentAxis).add(0, index);
+      } catch (IndexOutOfBoundsException e) {
+        while (indicesAndRanges.size() <= currentAxis) {
           indicesAndRanges.add(new ArrayList<>());
         }
-        indicesAndRanges.get(axis).add(0,index);
-      }
-    }
-    public void setRange(int axis, int min, int max){
-      try{
-        indicesAndRanges.get(axis).set(1, min);
-      } catch(IndexOutOfBoundsException e){
-        indicesAndRanges.get(axis).add(1,min);
-      }
-      try{
-        indicesAndRanges.get(axis).set(2, max);
-      } catch(IndexOutOfBoundsException e){
-        indicesAndRanges.get(axis).add(2,max);
+        indicesAndRanges.get(currentAxis).add(0, index);
       }
     }
 
-    public int getIndex(int axis){
-      return indicesAndRanges.get(axis).get(0);
-    }
-    public int getMin(int axis){
-      return indicesAndRanges.get(axis).get(1);
-    }
-    public int getMax(int axis){
-      return indicesAndRanges.get(axis).get(2);
+    public void setRange(int currentAxis, int min, int max) {
+      try {
+        indicesAndRanges.get(currentAxis).set(1, min);
+      } catch (IndexOutOfBoundsException e) {
+        indicesAndRanges.get(currentAxis).add(1, min);
+      }
+      try {
+        indicesAndRanges.get(currentAxis).set(2, max);
+      } catch (IndexOutOfBoundsException e) {
+        indicesAndRanges.get(currentAxis).add(2, max);
+      }
     }
 
-    public boolean isVisited(){
+    public int getIndex(int currentAxis) {
+      return indicesAndRanges.get(currentAxis).get(0);
+    }
+
+    public int getMin(int currentAxis) {
+      return indicesAndRanges.get(currentAxis).get(1);
+    }
+
+    public int getMax(int currentAxis) {
+      return indicesAndRanges.get(currentAxis).get(2);
+    }
+
+    public boolean isVisited() {
       return visited;
     }
 
-    public void visit(){
+    public void visit() {
       visited = true;
     }
 
-    public boolean inRange(int axis, int index){
-      return (index >= getMin(axis) && index <= getMax(axis));
+    public boolean inRange(int currentAxis, int index) {
+      return (index >= getMin(currentAxis) && index <= getMax(currentAxis));
     }
 
-    public boolean inRange(KDNode node){
-      for(int i = 0; i < numAxes; i++){
-        if(!inRange(i, node.getIndex(i))){
+    public boolean inRange(KDNode node) {
+      for (int i = 0; i < numAxes; i++) {
+        if (!inRange(i, node.getIndex(i))) {
           return false;
         }
       }
       return true;
     }
 
-    public boolean isSuitable(KDNode n){
+    public boolean isSuitable(KDNode n) {
       return !(n.isVisited() || !inRange(n));
     }
   }

@@ -10,7 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +24,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import edu.brown.cs.student.apiClient.ApiClient;
 import edu.brown.cs.student.orm.Database;
-import edu.brown.cs.student.recommender.*;
+import edu.brown.cs.student.recommender.RecommenderImpl;
+import edu.brown.cs.student.recommender.RecommenderResponse;
 import edu.brown.cs.student.runway.Runway;
 import freemarker.template.Configuration;
 import joptsimple.OptionParser;
@@ -123,13 +129,14 @@ public final class Main {
   /**
    * Helper method that returns a HashMap of the command keywords with their relevant method to
    * run (the relevant Command).
+   *
    * @return a HashMap of command strings to Commands
    */
   private HashMap<String, Command> createHashMap() {
     HashMap<String, Command> commands = new HashMap<>();
-    commands.put("get_users", (String[] args) -> client.usersApiCall(false));
-    commands.put("get_rents", (String[] args) -> client.rentsApiCall());
-    commands.put("get_reviews", (String[] args) -> client.reviewsApiCall());
+    commands.put("get_users", (String[] arguments) -> client.usersApiCall(false));
+    commands.put("get_rents", (String[] arguments) -> client.rentsApiCall());
+    commands.put("get_reviews", (String[] arguments) -> client.reviewsApiCall());
     commands.put("users", this::usersHelper);
     commands.put("similar", this::similarHelper);
     commands.put("classify", this::classifyReplHelper);
@@ -139,38 +146,38 @@ public final class Main {
     return commands;
   }
 
-  private void makeTeamHelper(String[] arguments){
-    for(HashSet<RecommenderResponse> group : recommender.generateGroups(Integer.parseInt(arguments[1]))){
+  private void makeTeamHelper(String[] arguments) {
+    for (HashSet<RecommenderResponse> group : recommender.generateGroups(
+        Integer.parseInt(arguments[1]))) {
       System.out.print("[");
       int counter = 0;
-      for(RecommenderResponse r : group){
-        System.out.print((counter != group.size()-1) ? r.getId() + ", " : r.getId());
+      for (RecommenderResponse r : group) {
+        System.out.print((counter != group.size() - 1) ? r.getId() + ", " : r.getId());
         counter++;
       }
       System.out.println("]");
     }
   }
 
-  private void recHelper(String[] arguments){
+  private void recHelper(String[] arguments) {
     if (arguments.length != 3) {
       System.out.println("ERROR: Invalid argument.");
       System.out.println("Valid usage: recsys_rec <num recs> <student_id>");
       return;
     }
 
-    try{
+    try {
       RecommenderResponse userR = recommender.getResponse(arguments[2]);
       List<RecommenderResponse> rList = recommender.getTopKRecommendations(
-              userR, Integer.parseInt(arguments[1]));
+          userR, Integer.parseInt(arguments[1]));
 
-      for(RecommenderResponse n : rList){
+      for (RecommenderResponse n : rList) {
         System.out.println(n.getId());
       }
 
-    } catch(IllegalArgumentException e) {
+    } catch (IllegalArgumentException e) {
       System.out.println("ERROR: Second argument must be a user ID.");
     }
-
 
 
   }
@@ -193,10 +200,11 @@ public final class Main {
     }
 
 //    RecommenderResponse[] responses = client.recommenderUsers();
-      edu.brown.cs.student.recommender.RecommenderResponse[] responses = client.localRecommenderUsers();
+    edu.brown.cs.student.recommender.RecommenderResponse[] responses =
+        client.localRecommenderUsers();
     try {
       Database db = new Database("data/integration.sqlite3");
-      for (edu.brown.cs.student.recommender.RecommenderResponse response: responses) {
+      for (edu.brown.cs.student.recommender.RecommenderResponse response : responses) {
         response.fetchDatabaseData(db);
       }
 
@@ -211,6 +219,7 @@ public final class Main {
 
   /**
    * Helper method called when the user runs the classify command.
+   *
    * @param arguments the array of command line arguments
    */
   private void classifyReplHelper(String[] arguments) {
@@ -226,7 +235,7 @@ public final class Main {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
             ArrayList<Runway> classify = runwayKDTree.knn(Integer.parseInt(arguments[1]),
-                   new int[]{user.getWeight(), user.getHeight(), user.getAge()});
+                new int[] {user.getWeight(), user.getHeight(), user.getAge()});
             classifyHelper(classify);
             userExists = true;
             break; // if we've found the user, break out of the loop
@@ -242,7 +251,7 @@ public final class Main {
     } else if (arguments.length == 5) {
       try {
         ArrayList<Runway> classify = runwayKDTree.knn(Integer.parseInt(arguments[1]),
-                new int[]{Integer.parseInt(arguments[2]),
+            new int[] {Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4])});
         classifyHelper(classify);
@@ -256,6 +265,7 @@ public final class Main {
 
   /**
    * Helper method called when the similar command is run.
+   *
    * @param arguments the array of command line arguments
    */
   private void similarHelper(String[] arguments) {
@@ -271,7 +281,7 @@ public final class Main {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
             ArrayList<Runway> similar = runwayKDTree.knn(Integer.parseInt(arguments[1]),
-                   new int[]{ user.getWeight(), user.getHeight(), user.getAge()});
+                new int[] {user.getWeight(), user.getHeight(), user.getAge()});
             for (Runway neighbor : similar) {
               System.out.println(neighbor.getUserId());
             }
@@ -289,7 +299,7 @@ public final class Main {
     } else if (arguments.length == 5) { //if coordinate input
       try {
         ArrayList<Runway> similar = runwayKDTree.knn(Integer.parseInt(arguments[1]),
-                new int[]{Integer.parseInt(arguments[2]),
+            new int[] {Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4])});
         for (Runway neighbor : similar) {
@@ -306,6 +316,7 @@ public final class Main {
   /**
    * Helper method called in the classifyReplHelper method to print the nearest neighbours zodiac
    * table.
+   *
    * @param classify the array of users (Runway) to print the zodiacs of
    */
   private void classifyHelper(ArrayList<Runway> classify) {
@@ -325,6 +336,7 @@ public final class Main {
   /**
    * Helper method called when the user runs the users command.
    * Loads the users data from an inputted file into a KDTree.
+   *
    * @param arguments the array of command line arguments
    */
   private void usersHelper(String[] arguments) {
@@ -352,7 +364,6 @@ public final class Main {
       }
 
       String[] dimensions = new String[] {"weight", "height", "age"};
-      //TODO: Fix this by making an interface for Runway/RecommenderResponse/etc.
       runwayKDTree = new KDTree<>(data, dimensions.length);
       System.out.println("Loaded " + data.length + " users from " + arguments[1]);
     } catch (IOException e) {
