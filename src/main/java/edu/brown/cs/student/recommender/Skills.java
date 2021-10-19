@@ -22,7 +22,7 @@ public class Skills {
     name = map.get("name");
     commenting = Integer.parseInt(map.get("commenting"));
     testing = Integer.parseInt(map.get("testing"));
-    oop = Integer.parseInt(map.get("OOP"));
+    oop = Integer.parseInt(map.get("oop"));
     algorithms = Integer.parseInt(map.get("algorithms"));
     teamwork = Integer.parseInt(map.get("teamwork"));
     frontend = Integer.parseInt(map.get("frontend"));

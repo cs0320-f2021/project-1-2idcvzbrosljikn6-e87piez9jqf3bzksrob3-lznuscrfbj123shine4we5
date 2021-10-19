@@ -112,8 +112,7 @@ public final class Main {
             commands.get(arguments[0]).run(arguments);
           } else {
             System.out.println("ERROR: invalid command.");
-            System.out.println("Valid commands: get_users, get_rents, "
-                + "get_reviews, users, similar, classify");
+            System.out.println("Valid commands: " + commands.keySet());
           }
         } catch (Exception e) {
           System.out.println("ERROR: We couldn't process your input");
@@ -182,8 +181,6 @@ public final class Main {
     } catch (IllegalArgumentException e) {
       System.out.println("ERROR: Second argument must be a user ID.");
     }
-
-
   }
 
   private void loadHelper(String[] arguments) {
@@ -203,12 +200,11 @@ public final class Main {
       return;
     }
 
-//    RecommenderResponse[] responses = client.recommenderUsers();
-    edu.brown.cs.student.recommender.RecommenderResponse[] responses =
+    RecommenderResponse[] responses =
         client.localRecommenderUsers();
     try {
       Database db = new Database("data/integration.sqlite3");
-      for (edu.brown.cs.student.recommender.RecommenderResponse response : responses) {
+      for (RecommenderResponse response : responses) {
         response.fetchDatabaseData(db);
       }
 

@@ -55,7 +55,7 @@ public class RecommenderResponse implements Item, KDTreeItem {
 
   @Override
   public List<String> getVectorRepresentation() {
-    List vector = new ArrayList<>(Arrays.asList(experience, horoscope, meetingTimes,
+    List<String> vector = new ArrayList<>(Arrays.asList(experience, horoscope, meetingTimes,
         preferredLanguage, marginalizedGroups, preferGroup));
     for (String elt : interests) {
       vector.add(elt);
