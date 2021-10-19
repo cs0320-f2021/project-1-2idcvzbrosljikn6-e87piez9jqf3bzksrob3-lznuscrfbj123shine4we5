@@ -1,4 +1,11 @@
-For a developer to add a new command to the REPL, he or she should decide what
+Project name: Project 1 - Data: Integration
+Team members: jvladuti, tjones10, usodhi
+
+Design choices:
+Given the shortened amount of time we had, we decided not to implement a GUI and stuck
+with the CLI to display the results.
+
+For a developer to add a new command to the REPL, they should decide what
 the input to the REPL will be and then create a new helper method in our Main
 class which executes the desired functionality, optionally passing in a string
 array of arguments. Then the developer should add a new line to our createHashMap
