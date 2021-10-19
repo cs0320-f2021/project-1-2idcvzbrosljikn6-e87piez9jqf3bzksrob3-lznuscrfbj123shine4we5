@@ -39,7 +39,8 @@ public final class Main {
 
   // use port 4567 by default when running server
   private static final int DEFAULT_PORT = 4567;
-  private KDTree kdTree = null;
+  private KDTree<RecommenderResponse> kdTree = null;
+  private KDTree<Runway> runwayKDTree = null;
   private RecommenderImpl recommender = null;
 
   /**
@@ -158,11 +159,11 @@ public final class Main {
     }
 
     try{
-      edu.brown.cs.student.recommender.RecommenderResponse userR = recommender.getResponse(arguments[2]);
-      List<edu.brown.cs.student.recommender.RecommenderResponse> rList = recommender.getTopKRecommendations(
+      RecommenderResponse userR = recommender.getResponse(arguments[2]);
+      List<RecommenderResponse> rList = recommender.getTopKRecommendations(
               userR, Integer.parseInt(arguments[1]));
 
-      for(edu.brown.cs.student.recommender.RecommenderResponse n : rList){
+      for(RecommenderResponse n : rList){
         System.out.println(n.getId());
       }
 
@@ -213,7 +214,7 @@ public final class Main {
    * @param arguments the array of command line arguments
    */
   private void classifyReplHelper(String[] arguments) {
-    if (kdTree == null) {
+    if (runwayKDTree == null) {
       System.out.println("ERROR: No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
@@ -224,7 +225,7 @@ public final class Main {
       for (Runway user : DataStore.getRunways()) {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
-            RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+            ArrayList<Runway> classify = runwayKDTree.knn(Integer.parseInt(arguments[1]),
                    new int[]{user.getWeight(), user.getHeight(), user.getAge()});
             classifyHelper(classify);
             userExists = true;
@@ -240,7 +241,7 @@ public final class Main {
       }
     } else if (arguments.length == 5) {
       try {
-        RecommenderResponse[] classify = kdTree.knn(Integer.parseInt(arguments[1]),
+        ArrayList<Runway> classify = runwayKDTree.knn(Integer.parseInt(arguments[1]),
                 new int[]{Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4])});
@@ -258,7 +259,7 @@ public final class Main {
    * @param arguments the array of command line arguments
    */
   private void similarHelper(String[] arguments) {
-    if (kdTree == null) {
+    if (runwayKDTree == null) {
       System.out.println("ERROR: No KD Tree found. "
           + "Load a KD Tree using the \"users\" command first.");
       return;
@@ -269,9 +270,9 @@ public final class Main {
       for (Runway user : DataStore.getRunways()) {
         try {
           if (user.getUserId() == Integer.parseInt(arguments[2])) {
-            RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+            ArrayList<Runway> similar = runwayKDTree.knn(Integer.parseInt(arguments[1]),
                    new int[]{ user.getWeight(), user.getHeight(), user.getAge()});
-            for (RecommenderResponse neighbor : similar) {
+            for (Runway neighbor : similar) {
               System.out.println(neighbor.getId());
             }
             userExists = true;
@@ -287,11 +288,11 @@ public final class Main {
       }
     } else if (arguments.length == 5) { //if coordinate input
       try {
-        RecommenderResponse[] similar = kdTree.knn(Integer.parseInt(arguments[1]),
+        ArrayList<Runway> similar = runwayKDTree.knn(Integer.parseInt(arguments[1]),
                 new int[]{Integer.parseInt(arguments[2]),
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4])});
-        for (RecommenderResponse neighbor : similar) {
+        for (Runway neighbor : similar) {
           System.out.println(neighbor.getId());
         }
       } catch (NumberFormatException e) {
@@ -307,13 +308,13 @@ public final class Main {
    * table.
    * @param classify the array of users (Runway) to print the zodiacs of
    */
-  private void classifyHelper(RecommenderResponse[] classify) {
+  private void classifyHelper(ArrayList<Runway> classify) {
     Hashtable<String, Integer> zodiac = new Hashtable<>();
     String[] signs = new String[] {"Aries", "Taurus", "Gemini",
         "Cancer", "Leo", "Virgo",
         "Libra", "Scorpio", "Sagittarius",
         "Capricorn", "Aquarius", "Pisces"};
-    for (RecommenderResponse user : classify) {
+    for (Runway user : classify) {
       zodiac.put(user.getHoroscope(), zodiac.getOrDefault(user.getHoroscope(), 0) + 1);
     }
     for (String sign : signs) {
@@ -352,7 +353,7 @@ public final class Main {
 
       String[] dimensions = new String[] {"weight", "height", "age"};
       //TODO: Fix this by making an interface for Runway/RecommenderResponse/etc.
-      //kdTree = new KDTree(data, dimensions);
+      runwayKDTree = new KDTree<>(data, dimensions.length);
       System.out.println("Loaded " + data.length + " users from " + arguments[1]);
     } catch (IOException e) {
       System.out.println("ERROR: Unable to read from file " + arguments[1]);

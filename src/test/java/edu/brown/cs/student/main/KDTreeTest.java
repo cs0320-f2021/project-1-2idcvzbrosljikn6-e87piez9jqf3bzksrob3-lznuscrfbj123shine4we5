@@ -18,29 +18,30 @@ public class KDTreeTest {
     Runway[] data = DataStore.getRunways();
     String[] axes = new String[] {"weight", "height", "age"};
 
-    KDTree kd = new KDTree(data,axes);
-    for(KDTree.KDNode node : kd.getNodes()){
+    KDTree<Runway> kd = new KDTree<>(data, axes.length);
+    for (KDTree.KDNode node : kd.getNodes()) {
       assertTrue(node.getLeft() == null ||
           node.getLeft().getIndex(node.getAxis()) < node.getIndex(node.getAxis()));
       assertTrue(node.getRight() == null ||
           node.getRight().getIndex(node.getAxis()) > node.getIndex(node.getAxis()));
     }
-    assertEquals(kd.getNodes().size(),data.length);
+    assertEquals(kd.getNodes().size(), data.length);
   }
+
 //  @Test
-//  public void testKNN() throws Exception{
+//  public void testKNN() throws Exception {
 //    new ApiClient().usersApiCall(true);
-////    RecommenderResponse[] data = DataStore.getRunways();
-////    String[] axes = new String[] {"weight", "height", "age"};
-////
-////    KDTree kd = new KDTree(data,axes);
-////    //pick a random node
-////    KDTree.KDNode node = kd.getNodes().get((int)(Math.random()*kd.getNodes().size()));
+//    Runway[] data = DataStore.getRunways();
+//    String[] axes = new String[] {"weight", "height", "age"};
+//
+//    KDTree<Runway> kd = new KDTree<>(data,axes.length);
+//    //pick a random node
+//    KDTree<Runway>.KDNode node = kd.getNodes().get((int)(Math.random()*kd.getNodes().size()));
 //    //get the nearest s/2 neighbors to node, where s = total number of nodes
-//    //List<RecommenderResponse> nn = Arrays.asList(kd.knn(kd.getNodes().size()/2,
-//     //   kd.getNumVal(node.getData(), axes[0]),
-//       // kd.getNumVal(node.getData(), axes[1]),
-//        //kd.getNumVal(node.getData(), axes[2])));
+//    List<Runway> nn = Arrays.asList(kd.knn(kd.getNodes().size()/2,
+//       kd.getNumVal(node.getData(), axes[0]),
+//     kd.getNumVal(node.getData(), axes[1]),
+//    kd.getNumVal(node.getData(), axes[2])));
 //
 //    /*
 //    assert that all nodes not included in
@@ -51,23 +52,25 @@ public class KDTreeTest {
 //    are closer to node than the furthest-nearest-neighbor
 //    (barring the furthest neighbor in question)
 //     */
-//    System.out.println("Distances from target of the nearest " + kd.getNodes().size()/2 + " neighbors:");
-//    for(RecommenderResponse r : nn){
+//    System.out.println(
+//        "Distances from target of the nearest " + kd.getNodes().size() / 2 + " neighbors:");
+//    for (RecommenderResponse r : nn) {
 //      System.out.print(kd.euclideanDistance(node.getData(), r) + " ");
 //    }
 //
-//    for(KDTree.KDNode n : kd.getNodes()){
-//      if(nn.contains(n.getData())){
+//    for (KDTree.KDNode n : kd.getNodes()) {
+//      if (nn.contains(n.getData())) {
 //        assertTrue(kd.euclideanDistance(node.getData(), n.getData())
-//            <= kd.euclideanDistance(node.getData(), nn.get(nn.size()-1)));
-//      } else{
+//            <= kd.euclideanDistance(node.getData(), nn.get(nn.size() - 1)));
+//      } else {
 //        assertTrue("Found a node "
 //                + kd.euclideanDistance(node.getData(), n.getData()) +
 //                " units away from target that should have been included above.",
 //            kd.euclideanDistance(node.getData(), n.getData())
-//            >= kd.euclideanDistance(node.getData(), nn.get(nn.size()-1)));
+//                >= kd.euclideanDistance(node.getData(), nn.get(nn.size() - 1)));
 //      }
 //    }
-  }
-//
+//  }
 }
+//
+

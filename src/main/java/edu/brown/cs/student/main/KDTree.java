@@ -1,18 +1,19 @@
 package edu.brown.cs.student.main;
 
-import edu.brown.cs.student.recommender.RecommenderResponse;
+import edu.brown.cs.student.recommender.KDTreeItem;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 
-public class KDTree {
+public class KDTree<T extends KDTreeItem> {
   private final ArrayList<Hashtable<Integer,KDNode>> sortedTables;
   private final LinkedList<KDNode> nodeQueue;
   private final KDNode root;
   private final int numAxes;
   private final ArrayList<KDNode> nodeList;
 
-  public KDTree(RecommenderResponse[] dataArr, int axisNum) {
+  public KDTree(T[] dataArr, int axisNum) {
     nodeQueue = new LinkedList<>();
     numAxes = axisNum;
     sortedTables = new ArrayList<>();
@@ -29,7 +30,7 @@ public class KDTree {
     for(int skill : skillArr) {
       nodeList.sort((o1, o2) -> {
         try {
-          return (int) (o1.data.getSkills(skill) - o2.data.getSkills(skill));
+          return (int) (o1.data.getAxis(skill) - o2.data.getAxis(skill));
         } catch (Exception e) {
           e.printStackTrace();
           return 0;
@@ -62,9 +63,9 @@ public class KDTree {
     }
   }
 
-  public ArrayList<KDNode> buildNodes(RecommenderResponse[] data){
+  public ArrayList<KDNode> buildNodes(T[] data){
     ArrayList<KDNode> nodes = new ArrayList<>();
-    for(RecommenderResponse r: data){
+    for(T r: data){
       KDNode node = new KDNode();
       node.data = r;
       nodes.add(node);
@@ -126,8 +127,8 @@ public class KDTree {
     return null;
   }
 
-  public RecommenderResponse[] knn(int k, int[] target) {
-    ArrayList<RecommenderResponse> neighbors = new ArrayList<>();
+  public ArrayList<T> knn(int k, int[] target) {
+    ArrayList<T> neighbors = new ArrayList<>();
 
     /*
     Array to keep track of the index and distance of the furthest
@@ -144,8 +145,8 @@ public class KDTree {
   Also requires an axis number and an array of values for the furthest neighbor,
   explained in the comments for knn().
    */
-  private RecommenderResponse[] knnHelper(int k, int[] target, KDNode curr,
-                                          ArrayList<RecommenderResponse> neighbors, int furthest, int axis) {
+  private ArrayList<T> knnHelper(int k, int[] target, KDNode curr,
+                                          ArrayList<T> neighbors, int furthest, int axis) {
     //Get the straight-line (Euclidean) distance from your target point to the current node.
     int eDist = euclideanDistance(target, curr.data);
 
@@ -170,7 +171,7 @@ public class KDTree {
     if (curr.right == null && curr.left == null) {
       neighbors.sort(
           Comparator.comparingInt(o -> euclideanDistance(target, o)));
-      return neighbors.toArray(new RecommenderResponse[0]);
+      return neighbors;
     }
 
     /*
@@ -181,12 +182,15 @@ public class KDTree {
     than k neighbors so far.
      */
     int axisDist = 0;
-    axisDist = target[axis] - curr.data.getSkills(axis);
+    axisDist = target[axis] - curr.data.getAxis(axis);
     if (furthest > Math.abs(axisDist) || neighbors.size() < k) {
       if (curr.left != null) {
-        RecommenderResponse[] result = knnHelper(k, target, curr.left, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
+        ArrayList<T> result = knnHelper(k, target, curr.left, neighbors, furthest,
+            (axis == numAxes - 1) ?
+            0 : axis+1);
         if (curr.right != null && result != null) {
-          return knnHelper(k, target, curr.right, new ArrayList<>(Arrays.asList(result)), furthest, (axis == numAxes - 1) ? 0 : axis+1);
+          return knnHelper(k, target, curr.right, result, furthest, (axis == numAxes - 1) ? 0 :
+              axis+1);
         } else {
           return result;
         }
@@ -218,16 +222,16 @@ public class KDTree {
     } else if (axisDist > 0 && curr.right != null) {
       return knnHelper(k, target, curr.right, neighbors, furthest, (axis == numAxes - 1) ? 0 : axis+1);
     }
-    return neighbors.toArray(new RecommenderResponse[0]);
+    return neighbors;
   }
 
   /*
   Helper method to find the furthest neighbor and return its index and distance as an array.
    */
-  private int[] findFurthest(int[] target, List<RecommenderResponse> neighbors) {
+  private int[] findFurthest(int[] target, List<T> neighbors) {
     int index = 0;
     int dist = 0;
-    for (RecommenderResponse n : neighbors) {
+    for (T n : neighbors) {
       int nDist = euclideanDistance(target, n);
       dist = Math.max(dist, nDist);
       if (dist == nDist) {
@@ -241,15 +245,15 @@ public class KDTree {
   A helper function that gets the straight line distance between a target point and
   a given user (in terms of weight height and age).
    */
-  private int euclideanDistance(int[] target, RecommenderResponse r) {
+  private int euclideanDistance(int[] target, T r) {
     int sum = 0;
     for(int i = 0; i< numAxes; i++){
-      sum += Math.pow(target[i] - r.getSkills(i), 2);
+      sum += Math.pow(target[i] - r.getAxis(i), 2);
     }
     return (int) Math.sqrt(sum);
   }
   //public version for testing
-//  public int euclideanDistance(RecommenderResponse r1, RecommenderResponse r2) {
+//  public int euclideanDistance(T r1, T r2) {
 //    return (int) Math.abs(Math.sqrt(Math.pow(r1.getWeight() - r2.getWeight(), 2)
 //        + Math.pow(r1.getHeight() - r2.getHeight(), 2) + Math.pow(r1.getAge() - r2.getAge(), 2)));
 //  }
@@ -259,7 +263,7 @@ public class KDTree {
   }
 
   public class KDNode {
-    private RecommenderResponse data;
+    private T data;
     private KDNode left;
     private KDNode right;
     // know your indices in each of the 3 sortedTables. indices match up to axes
@@ -284,7 +288,7 @@ public class KDTree {
       return left;
     }
 
-    public RecommenderResponse getData(){
+    public T getData(){
       return data;
     }
 

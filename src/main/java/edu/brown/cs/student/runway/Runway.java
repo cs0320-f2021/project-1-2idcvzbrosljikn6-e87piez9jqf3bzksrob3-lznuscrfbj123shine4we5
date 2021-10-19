@@ -1,12 +1,13 @@
 package edu.brown.cs.student.runway;
 
 import com.google.gson.annotations.SerializedName;
+import edu.brown.cs.student.recommender.KDTreeItem;
 
 /**
  * Class representing Runway data loaded from the API or from a file.
  * Runway contains all attributes the others do, so there should be no errors - gson handles it.
  */
-public class Runway {
+public class Runway implements KDTreeItem {
 
   public static final int FEET_MULTIPLIER = 12;
   private String fit;
@@ -156,5 +157,20 @@ public class Runway {
    */
   public String getHoroscope() {
     return horoscope;
+  }
+
+  @Override
+  public int getAxis(int i) {
+    switch (i){
+      case 0:
+        return getWeight();
+      case 1:
+        return getHeight();
+      case 2:
+        return age;
+      default:
+        System.out.println("ERROR: invalid axis input for Runway");
+        return -1;
+    }
   }
 }

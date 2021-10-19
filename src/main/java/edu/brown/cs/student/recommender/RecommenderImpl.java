@@ -18,7 +18,7 @@ import java.util.*;
 public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
   private HashMap<String, RecommenderResponse> dataMap;
-  private KDTree tree;
+  private KDTree<RecommenderResponse> tree;
   private BloomFilterRecommender<RecommenderResponse> bfr;
 
 
@@ -30,7 +30,7 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
       //Make KDTree and BloomFilter with dataMap data
       bfr = new BloomFilterRecommender<>(dataMap, 0.01);
-      tree = new KDTree(responses, 6);
+      tree = new KDTree<>(responses, 6);
 
       System.out.println("Loaded Recommender with " + responses.length + " students.");
   }
@@ -49,10 +49,10 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       sort list of id's in ascending order by summed index in both lists, return top K
        */
 
-    List<RecommenderResponse> treeList = Arrays.asList(tree.knn(dataMap.size(), target.getSkills()));
+    List<RecommenderResponse> treeList = tree.knn(dataMap.size(), target.getSkills());
     List<RecommenderResponse> bfrList = bfr.getTopKRecommendations(target, dataMap.size());
 
-    List<RecommenderResponse> result = new ArrayList<RecommenderResponse>(bfrList);
+    List<RecommenderResponse> result = new ArrayList<>(bfrList);
     result.sort(Comparator.comparingInt(o -> (treeList.indexOf(o) + bfrList.indexOf(o))));
 
     //if k is the size of the whole data set, save this list as the person's compatibility list while we're here.
@@ -60,7 +60,7 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       target.setCompatibilityList(result);
       return result;
     }
-    return result.subList(0, k-1);
+    return result.subList(0, k);
   }
 
   public List<HashSet<RecommenderResponse>> generateGroups(int k){
@@ -90,19 +90,25 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
        */
       List<HashSet<RecommenderResponse>> groups = new ArrayList<>();
 
+      int total = 0;
       for(int i = dataMap.size()-1; i >= 0; i--){
           //find the top K recommendations, which should just be the first K people in their compatibility list.
-          HashSet<RecommenderResponse> group = new HashSet();
+          HashSet<RecommenderResponse> group = new HashSet<>();
           int j = 0;
-          while(group.size() < k && j < dataMap.size()) {
+          while(group.size() < k && j < dataMap.size() - 1) {
+            System.out.println(i + " " + j);
               RecommenderResponse groupMate = ACList.get(i).getCompatibilityList().get(j);
               if(!groupMate.inGroup){
                   group.add(groupMate);
                   groupMate.inGroup = true;
+                  total+=1;
               }
               j++;
           }
           groups.add(group);
+          if (total == dataMap.size()) {
+            break;
+          }
       }
       return groups;
   }

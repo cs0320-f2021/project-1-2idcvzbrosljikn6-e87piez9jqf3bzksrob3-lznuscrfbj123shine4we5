@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 
-public class RecommenderResponse implements Item {
+public class RecommenderResponse implements Item, KDTreeItem {
 
   private String id;
   private String name;
@@ -203,5 +203,10 @@ public class RecommenderResponse implements Item {
 
   public ArrayList<String> getPositiveTraits() {
     return new ArrayList<> (positiveTraits);
+  }
+
+  @Override
+  public int getAxis(int i) {
+    return skillArr[i];
   }
 }
