@@ -8,8 +8,10 @@ package edu.brown.cs.student.recommender;
  */
 
 
+import edu.brown.cs.student.bloomfilter.BloomFilter;
 import edu.brown.cs.student.bloomfilter.BloomFilterRecommender;
 import edu.brown.cs.student.main.KDTree;
+import org.checkerframework.checker.units.qual.K;
 
 import java.util.*;
 
@@ -76,6 +78,7 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       index in all other individual compatibility lists.
        */
       List<RecommenderResponse> ACList = new ArrayList<>(dataMap.values());
+      ACList.forEach(response -> response.inGroup = false);
       ACList.sort(Comparator.comparingInt(this::avgCompatibilityScore));
 
       /* More compatible people have lower average compatibility scores, because
@@ -93,10 +96,17 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
           //find the top K recommendations, which should just be the first K people in their compatibility list.
           HashSet<RecommenderResponse> group = new HashSet<>();
           int j = 0;
+          RecommenderResponse currentMember = ACList.get(i);
+          if (currentMember.inGroup) {
+            break;
+          } else {
+            group.add(currentMember);
+            currentMember.inGroup = true;
+            total++;
+          }
           while(group.size() < k && j < dataMap.size() - 1) {
-            System.out.println(i + " " + j);
               RecommenderResponse groupMate = ACList.get(i).getCompatibilityList().get(j);
-              if(!groupMate.inGroup){
+              if (!groupMate.inGroup){
                   group.add(groupMate);
                   groupMate.inGroup = true;
                   total+=1;
