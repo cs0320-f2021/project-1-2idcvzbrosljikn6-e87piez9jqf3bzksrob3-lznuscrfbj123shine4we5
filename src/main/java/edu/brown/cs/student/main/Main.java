@@ -293,7 +293,7 @@ public final class Main {
                 Integer.parseInt(arguments[3]),
                 Integer.parseInt(arguments[4])});
         for (Runway neighbor : similar) {
-          System.out.println(neighbor.getId());
+          System.out.println(neighbor.getUserId());
         }
       } catch (NumberFormatException e) {
         System.out.println("ERROR: Argument not integer.");
