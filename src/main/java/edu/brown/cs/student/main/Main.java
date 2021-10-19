@@ -273,7 +273,7 @@ public final class Main {
             ArrayList<Runway> similar = runwayKDTree.knn(Integer.parseInt(arguments[1]),
                    new int[]{ user.getWeight(), user.getHeight(), user.getAge()});
             for (Runway neighbor : similar) {
-              System.out.println(neighbor.getId());
+              System.out.println(neighbor.getUserId());
             }
             userExists = true;
             break;

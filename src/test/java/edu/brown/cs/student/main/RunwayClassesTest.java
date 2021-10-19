@@ -23,7 +23,7 @@ public class RunwayClassesTest {
   @Test
   public void testUser() {
     String json =
-        ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justusersSMALL.json"));
+        ApiClient.normaliseJson(FileParser.readIntoString("data/justusersSMALL.json"));
     User[] data = new Gson().fromJson(json, User[].class);
     assertEquals(data.length, RESULT_LENGTH_1);
     for (User u: data) {
@@ -36,7 +36,7 @@ public class RunwayClassesTest {
   @Test
   public void testRunway() {
     String json =
-        ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/runwaySMALL.json"));
+        ApiClient.normaliseJson(FileParser.readIntoString("data/runwaySMALL.json"));
     Runway[] data = new Gson().fromJson(json, Runway[].class);
     assertEquals(data.length, RESULT_LENGTH_2);
     for (Runway u: data) {
@@ -52,7 +52,7 @@ public class RunwayClassesTest {
   @Test
   public void testRent() {
     String json =
-        ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justrentSMALL.json"));
+        ApiClient.normaliseJson(FileParser.readIntoString("data/justrentSMALL.json"));
     Rent[] data = new Gson().fromJson(json, Rent[].class);
     assertEquals(data.length, RESULT_LENGTH_2);
     for (Rent u: data) {
@@ -65,7 +65,7 @@ public class RunwayClassesTest {
   @Test
   public void testReview() {
     String json =
-        ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justreviewsSMALL.json"));
+        ApiClient.normaliseJson(FileParser.readIntoString("data/justreviewsSMALL.json"));
     Review[] data = new Gson().fromJson(json, Review[].class);
     assertEquals(data.length, RESULT_LENGTH_2);
     for (Review u: data) {
@@ -78,7 +78,7 @@ public class RunwayClassesTest {
   @Test
   public void testRunwayUserOverlap() {
     String json =
-        ApiClient.normaliseJson(FileParser.readIntoString("data/project-1/justusersSMALL.json"));
+        ApiClient.normaliseJson(FileParser.readIntoString("data/justusersSMALL.json"));
     Runway[] data = new Gson().fromJson(json, Runway[].class);
     assertEquals(data.length, RESULT_LENGTH_1);
     for (Runway u: data) {
