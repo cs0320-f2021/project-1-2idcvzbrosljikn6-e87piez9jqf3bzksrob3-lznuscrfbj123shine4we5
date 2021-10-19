@@ -5,10 +5,7 @@ import edu.brown.cs.student.orm.Database;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class RecommenderResponse implements Item {
@@ -54,8 +51,18 @@ public class RecommenderResponse implements Item {
 
   @Override
   public List<String> getVectorRepresentation() {
-
-    return null;
+    List vector = new ArrayList<>(Arrays.asList(experience, horoscope, meetingTimes,
+    preferredLanguage, marginalizedGroups, preferGroup));
+    for (String elt : interests) {
+      vector.add(elt);
+    }
+    for (String elt : negativeTraits) {
+      vector.add(elt);
+    }
+    for (String elt : positiveTraits) {
+      vector.add(elt);
+    }
+    return vector;
   }
 
   @Override
