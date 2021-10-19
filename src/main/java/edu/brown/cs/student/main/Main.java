@@ -146,9 +146,13 @@ public final class Main {
     return commands;
   }
 
-  private void makeTeamHelper(String[] arguments) {
-    for (HashSet<RecommenderResponse> group : recommender.generateGroups(
-        Integer.parseInt(arguments[1]))) {
+  private void makeTeamHelper(String[] arguments){
+    if(arguments.length != 2){
+      System.out.println("ERROR: Invalid argument.");
+      System.out.println("Valid usage: recsys_gen_groups <group size>");
+      return;
+    }
+    for(HashSet<RecommenderResponse> group : recommender.generateGroups(Integer.parseInt(arguments[1]))){
       System.out.print("[");
       int counter = 0;
       for (RecommenderResponse r : group) {

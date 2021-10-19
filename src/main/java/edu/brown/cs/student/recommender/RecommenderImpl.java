@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RecommenderImpl implements Recommender<RecommenderResponse> {
 
@@ -75,7 +76,6 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
       r.setCompatibilityList(getTopKRecommendations(r, dataMap.size()));
     }
 
-
       /*
       create sorted list of responses by average compatibility score — that is, their average
       index in all other individual compatibility lists.
@@ -117,9 +117,48 @@ public class RecommenderImpl implements Recommender<RecommenderResponse> {
         }
         j++;
       }
-      System.out.println(group.size());
-      System.out.println(k);
-      groups.add(group);
+          /*
+          If the final group has too few members due to
+          the students not breaking evenly into k groups...
+           */
+      if (group.size() < k) {
+        System.out.println(dataMap.size() + "students do not divide evenly into " + k + " groups.");
+            /*
+            if it's k-1 just print a notification of the smaller group
+             */
+        if (group.size() == k - 1) {
+          System.out.println("The final group consists of " + (k - 1) + " students.");
+        } else if (group.size() <= groups.size()) {
+          /*
+            else if group.size() <= groups.size(), put them all in other groups
+            such that all groups are either k or k+1, then notify
+             */
+          int count = 1;
+          for (RecommenderResponse r : group) {
+            groups.get(groups.size() - count).add(r);
+            count++;
+          }
+          System.out.println("Reallocations have been made. " + (count - 1) + "out of "
+              + groups.size() + " groups now have " + (k + 1) + " members.");
+        } else if (group.size() + groups.size() >= k - 1) {
+          int count = 0;
+          while (group.size() < k - 1) {
+            Set<RecommenderResponse> g = groups.get(count);
+            RecommenderResponse student = g.iterator().next();
+            g.remove(student);
+            group.add(student);
+            count++;
+          }
+          groups.add(group);
+          System.out.println("Reallocations have been made. " + count + "out of "
+              + (groups.size()) + " groups now have " + (k - 1) + " members.");
+        } else {
+          groups.add(group);
+          System.out.println("The final group has only " + group.size() + " members.");
+        }
+      } else {
+        groups.add(group);
+      }
       if (total == dataMap.size()) {
         break;
       }
